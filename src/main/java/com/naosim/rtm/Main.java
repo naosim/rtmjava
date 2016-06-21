@@ -1,8 +1,11 @@
 package com.naosim.rtm;
 
-import com.naosim.rtm.domain.model.TaskDateTimes;
-import com.naosim.rtm.domain.model.TaskEntity;
-import com.naosim.rtm.domain.model.TaskSeriesId;
+import com.naosim.rtm.domain.model.*;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -17,34 +20,22 @@ public class Main {
     public static final String SHARED_SECRET = new TrmApiConfig().getSharedSecret();
 
     public static void main(String... args) {
-//        TaskEntity p = new TaskEntity("hoge");
-
-        Map<RtmParamKey, String> rtmParams = new HashMap<>();
-        rtmParams.put(RtmParamKey.method, "rtm.auth.getFrob");
-        rtmParams.put(RtmParamKey.api_key, API_KEY);
+        Map<RtmParam, RtmParamValueObject> rtmParams = new HashMap<>();
+        rtmParams.put(RtmParam.method, RtmMethod.auth_getfrob);
+        rtmParams.put(RtmParam.api_key, new ApiKey(API_KEY));
         String sharedSecret = SHARED_SECRET;
-        String org = sharedSecret + rtmParams.keySet().stream().sorted().map(key -> key + rtmParams.get(key)).reduce((v1, v2) -> v1 + v2).orElse("");
         System.out.println(createApiSig(sharedSecret, rtmParams));
-        System.out.println(md5(org));
-        System.out.println(md5("48c33e83a8923993api_keybbce87d819e9002842abfbc1d3a42374methodrtm.auth.getFrob"));
+
+        HttpClient c = HttpClientBuilder.create().build();
+        HttpGet httpGet = new HttpGet("https://api.rememberthemilk.com/services/rest/");
     }
 
-    interface ValueObject<T> {
-        T getValue();
+    public static String createQuery(Map<RtmParam, RtmParamValueObject> rtmParams) {
+        return null;
     }
 
-    public enum RtmParamKey implements ValueObject<String> {
-        method,
-        api_key;
-
-        @Override
-        public String getValue() {
-            return name();
-        }
-    }
-
-    public static final String createApiSig(String sharedSecret, Map<RtmParamKey, String> rtmParams) {
-        return md5(sharedSecret + rtmParams.keySet().stream().sorted(comparing(RtmParamKey::getValue)).map(key -> key.getValue() + rtmParams.get(key)).reduce((v1, v2) -> v1 + v2).orElse(""));
+    public static final String createApiSig(String sharedSecret, Map<RtmParam, RtmParamValueObject> rtmParams) {
+        return md5(sharedSecret + rtmParams.keySet().stream().sorted(comparing(RtmParam::getValue)).map(key -> key.getValue() + rtmParams.get(key).getRtmParamValue()).reduce((v1, v2) -> v1 + v2).orElse(""));
     }
 
     public static String md5(String str) {
