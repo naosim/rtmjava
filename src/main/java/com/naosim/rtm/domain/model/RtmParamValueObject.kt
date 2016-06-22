@@ -10,6 +10,11 @@ interface RtmParamValueObject {
 class ApiKey(override val rtmParamValue: String) : RtmParamValueObject {}
 class SharedSecret(override val rtmParamValue: String) : RtmParamValueObject {}
 
+enum class Format : RtmParamValueObject {
+    json;
+    override val rtmParamValue: String = name
+}
+
 class ApiSig(val sharedSecret: SharedSecret, val rtmParams: Map<RtmParam, RtmParamValueObject>) : RtmParamValueObject {
     override val rtmParamValue: String = md5(sharedSecret.rtmParamValue + rtmParams.keys.sortedBy { it.value }.map { it.value + rtmParams[it]!!.rtmParamValue }.reduce { v1, v2 -> v1 + v2 })//(comparing<RtmParam, String>(Function<RtmParam, String> { it.getValue() })).map({ key -> key.value + rtmParams[key].rtmParamValue }).reduce({ v1, v2 -> v1 + v2 }).orElse(""))
 
