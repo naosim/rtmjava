@@ -9,6 +9,10 @@ interface RtmParamValueObject {
 }
 class ApiKey(override val rtmParamValue: String) : RtmParamValueObject {}
 class SharedSecret(override val rtmParamValue: String) : RtmParamValueObject {}
+open class Frob(override val rtmParamValue: String) : RtmParamValueObject {}
+class FrobUnAuthed(override val rtmParamValue: String) : Frob(rtmParamValue) {}
+class FrobAuthed(override val rtmParamValue: String) : Frob(rtmParamValue) {}
+class Token(override val rtmParamValue: String) : RtmParamValueObject {}
 
 enum class Format : RtmParamValueObject {
     json;
@@ -31,5 +35,11 @@ class ApiSig(val sharedSecret: SharedSecret, val rtmParams: Map<RtmParam, RtmPar
     }
 }
 enum class RtmMethod(override val rtmParamValue: String) : RtmParamValueObject {
-    auth_getfrob("rtm.auth.getFrob");
+    auth_getfrob("rtm.auth.getFrob"),
+    auth_gettoken("rtm.auth.getToken");
+}
+
+enum class RtmPerms : RtmParamValueObject {
+    delete;
+    override val rtmParamValue: String = name
 }

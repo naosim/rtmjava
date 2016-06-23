@@ -5,6 +5,8 @@ enum class RtmParam {
     api_sig,
     api_key,
     format,
-    frob;
+    perms,
+    frob,
+    token;
     val value = name
 }

@@ -1,6 +1,10 @@
 package com.naosim.rtm.lib;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 
 import java.io.BufferedReader;
@@ -34,5 +38,18 @@ public class HttpRequestUtil {
             }
         }
         return sb.toString();
+    }
+
+    public static HttpRegularResult requestByGet(String url) throws IOException, StatusCodeOver400Exception {
+        HttpClient c = HttpClientBuilder.create().build();
+        HttpGet httpGet = new HttpGet(url);
+        HttpResponse res = c.execute(httpGet);
+        int code = res.getStatusLine().getStatusCode();
+        if(code >= 400) {
+            throw new StatusCodeOver400Exception(code);
+        }
+        res.getEntity().getContent();
+        String body = HttpRequestUtil.convert(res.getEntity().getContent());
+        return new HttpRegularResult(code, body);
     }
 }
