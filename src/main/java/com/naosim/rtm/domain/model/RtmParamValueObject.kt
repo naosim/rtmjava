@@ -1,6 +1,5 @@
 package com.naosim.rtm.domain.model
 
-import org.apache.http.client.utils.URLEncodedUtils
 import java.math.BigInteger
 import java.security.MessageDigest
 

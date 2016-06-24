@@ -40,7 +40,7 @@ public class HttpRequestUtil {
         return sb.toString();
     }
 
-    public static HttpRegularResult requestByGet(String url) throws IOException, StatusCodeOver400Exception {
+    public static <T> HttpRegularResult<T> requestByGet(String url, Function<InputStream, T> proc) throws IOException, StatusCodeOver400Exception {
         HttpClient c = HttpClientBuilder.create().build();
         HttpGet httpGet = new HttpGet(url);
         HttpResponse res = c.execute(httpGet);
@@ -49,7 +49,7 @@ public class HttpRequestUtil {
             throw new StatusCodeOver400Exception(code);
         }
         res.getEntity().getContent();
-        String body = HttpRequestUtil.convert(res.getEntity().getContent());
-        return new HttpRegularResult(code, body);
+        T body = proc.apply(res.getEntity().getContent());
+        return new HttpRegularResult<T>(code, body);
     }
 }

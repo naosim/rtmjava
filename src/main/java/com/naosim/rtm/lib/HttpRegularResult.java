@@ -1,10 +1,10 @@
 package com.naosim.rtm.lib;
 
-public class HttpRegularResult {
+public class HttpRegularResult<T> {
     private final int statusCode;
-    private final String body;
+    private final T body;
 
-    public HttpRegularResult(int statusCode, String body) {
+    public HttpRegularResult(int statusCode, T body) {
         this.statusCode = statusCode;
         this.body = body;
     }
@@ -13,7 +13,7 @@ public class HttpRegularResult {
         return statusCode;
     }
 
-    public String getBody() {
+    public T getBody() {
         return body;
     }
 }

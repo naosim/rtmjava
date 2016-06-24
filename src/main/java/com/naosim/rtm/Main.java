@@ -1,29 +1,26 @@
 package com.naosim.rtm;
 
-import com.naosim.rtm.domain.model.*;
+import com.naosim.rtm.domain.model.FrobAuthed;
+import com.naosim.rtm.domain.model.FrobUnAuthed;
+import com.naosim.rtm.domain.model.GetTokenResponse;
+import com.naosim.rtm.domain.model.Token;
 import com.naosim.rtm.infra.datasource.RtmRepositoryNet;
-import com.naosim.rtm.lib.HttpRegularResult;
-import com.naosim.rtm.lib.HttpRequestUtil;
-import com.naosim.rtm.lib.StatusCodeOver400Exception;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Main {
-    public static final ApiKey API_KEY = new RtmApiConfigImpl().getApiKey();
-    public static final SharedSecret SHARED_SECRET = new RtmApiConfigImpl().getSharedSecret();
-
-    public static void main(String... args) {
+    public static void main(String... args) throws InterruptedException {
         RtmRepositoryNet rtmRepository = new RtmRepositoryNet();
-        Frob frob = rtmRepository.getFrob();
-        rtmRepository.auth(frob);
-        rtmRepository.getToken(frob);
-//        System.out.print(frob.getRtmParamValue());
+
+        FrobUnAuthed frob = rtmRepository.getFrob();
+        String authUrl = rtmRepository.getAuthUrl(frob);
+        System.out.print("Please access: ");
+        System.out.println(authUrl);
+        Thread.sleep(20 * 1000);
+
+        System.out.println("restart");
+
+        FrobAuthed frobAuthed = new FrobAuthed(frob.getRtmParamValue());
+        GetTokenResponse getTokenResponse = rtmRepository.getToken(frobAuthed);
+        System.out.print(getTokenResponse.getToken().getRtmParamValue());
     }
 
 }
