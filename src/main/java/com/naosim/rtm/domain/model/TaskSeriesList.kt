@@ -4,7 +4,9 @@ import java.util.*
 
 class TaskSeriesListEntity(
         val taskSeriesListId: TaskSeriesListId,
-        val taskSeriesListName: Optional<TaskSeriesListName>
+        val taskSeriesListName: Optional<TaskSeriesListName>,
+        val TaskSeriesEntityList: List<TaskSeriesEntity>
+
 ) {}
 
 class TaskSeriesListId(val value: String){}
