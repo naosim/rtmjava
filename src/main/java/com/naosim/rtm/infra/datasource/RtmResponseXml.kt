@@ -6,7 +6,7 @@ import java.util.*
 class RtmResponseXml(val rootElement: Element) {
     val isOk = rootElement.getAttribute("stat") == "ok"
     val isFailed = !isOk
-    val failedResponse: RtmResponseFailed? = if(!isOk) RtmResponseFailed(rootElement.getAttribute("code"), rootElement.getAttribute("msg")) else  null
+    val failedResponse: RtmResponseFailed? = if(!isOk) RtmResponseFailed(getFirstElementByTagName("err").getAttribute("code"), getFirstElementByTagName("err").getAttribute("msg")) else  null
 
     fun getFirstElementByTagName(tagName: String): Element {
         return rootElement.getElementsByTagName(tagName).item(0) as Element

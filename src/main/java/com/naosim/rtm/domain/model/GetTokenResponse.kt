@@ -1,5 +1,5 @@
 package com.naosim.rtm.domain.model
 
-class GetTokenResponse(val token: Token, val user: User) {
+import com.naosim.rtm.domain.model.auth.CheckedToken
 
-}
+class GetTokenResponse(val checkedToken: CheckedToken, val user: User) {}

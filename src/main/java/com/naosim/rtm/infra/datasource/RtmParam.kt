@@ -1,4 +1,4 @@
-package com.naosim.rtm.domain.model
+package com.naosim.rtm.infra.datasource
 
 enum class RtmParam {
     method,
@@ -7,6 +7,9 @@ enum class RtmParam {
     format,
     perms,
     frob,
-    token;
+//    token,
+    auth_token,
+    filter
+    ;
     val value = name
 }
