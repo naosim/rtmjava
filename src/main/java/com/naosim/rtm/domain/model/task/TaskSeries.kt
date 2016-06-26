@@ -1,5 +1,7 @@
-package com.naosim.rtm.domain.model
+package com.naosim.rtm.domain.model.task
 
+import com.naosim.rtm.domain.model.RtmParamValueObject
+import com.naosim.rtm.domain.model.task.Tag
 import java.time.LocalDateTime
 
 class TaskSeriesEntity(
@@ -24,6 +26,6 @@ class TaskSeriesDateTimes(
 class TaskSeriesCreatedDateTime(val dateTime: LocalDateTime) {}
 class TaskSeriesModifiedDateTime(val dateTime: LocalDateTime) {}
 
-class TaskSeriesName(val value: String) {}
+class TaskSeriesName(override val rtmParamValue: String) : RtmParamValueObject {}
 class TaskSeriesSource(val value: String) {}
 class TaskSeriesLocationid(val value: String) {}

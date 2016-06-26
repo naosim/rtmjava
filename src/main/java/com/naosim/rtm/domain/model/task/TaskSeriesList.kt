@@ -1,11 +1,11 @@
-package com.naosim.rtm.domain.model
+package com.naosim.rtm.domain.model.task
 
 import java.util.*
 
 class TaskSeriesListEntity(
         val taskSeriesListId: TaskSeriesListId,
         val taskSeriesListName: Optional<TaskSeriesListName>,
-        val TaskSeriesEntityList: List<TaskSeriesEntity>
+        val taskSeriesEntityList: List<TaskSeriesEntity>
 
 ) {}
 

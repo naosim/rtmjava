@@ -1,4 +1,4 @@
-package com.naosim.rtm.domain.model
+package com.naosim.rtm.domain.model.task
 
 import java.time.LocalDateTime
 import java.util.*

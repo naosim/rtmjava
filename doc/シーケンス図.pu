@@ -1,0 +1,50 @@
+@startuml
+actor user
+box
+participant system
+participant DB
+end box
+participant RTM
+
+user -> system: Start Login
+activate system
+system -> RTM: getFrob
+activate RTM
+deactivate RTM
+system --> user: Auth URL with Frob
+deactivate system
+
+user -> RTM: login and allow
+activate RTM
+deactivate RTM
+
+user -> system: Get Client Token
+activate system
+system -> RTM: getToken
+activate RTM
+deactivate RTM
+system -> system: create Client Token
+system -> DB: Save \nClient Token \nand Token
+activate DB
+deactivate DB
+system --> user: Client Token
+deactivate system
+
+user -> system: call method\nwith Client Token
+activate system
+system -> DB: Get Token
+activate DB
+deactivate DB
+system -> RTM: call some api
+activate RTM
+deactivate RTM
+deactivate system
+
+user -> system: logout
+activate system
+system -> DB: delete token
+activate DB
+deactivate DB
+deactivate system
+
+@enduml

@@ -1,8 +1,14 @@
 package com.naosim.rtm.infra.datasource
 
-import com.naosim.rtm.RtmApiConfig
-import com.naosim.rtm.domain.model.*
+import com.naosim.rtm.domain.model.Filter
+import com.naosim.rtm.domain.model.RtmParamValueObject
 import com.naosim.rtm.domain.model.auth.Token
+import com.naosim.rtm.domain.model.task.*
+import com.naosim.rtm.domain.model.timeline.*
+import com.naosim.rtm.domain.repository.RtmTaskRepository
+import com.naosim.rtm.infra.datasource.common.RtmMethod
+import com.naosim.rtm.infra.datasource.common.RtmParam
+import com.naosim.rtm.infra.datasource.common.RtmRequestUtil
 import org.w3c.dom.Element
 import java.util.*
 
@@ -22,20 +28,42 @@ class RtmTaskRepositoryNet(val rtmApiConfig: RtmApiConfig): RtmTaskRepository {
             throw RuntimeException(response.failedResponse!!.code + " " + response.failedResponse!!.msg)
         }
         println(response.rootElement.getElementsByTagName("list"))
-        val taskSeriesListEntityList = rtmRequestUtil.convertToList(response.rootElement.getElementsByTagName("list")).map {
-            val taskSeriesListId = TaskSeriesListId(it.getAttribute("id"))
-
-            TaskSeriesListEntity(
-                    taskSeriesListId,
-                    Optional.ofNullable(it.getAttribute("name")).filter { it.isNotEmpty() }.map{ TaskSeriesListName(it) },
-                    rtmRequestUtil.convertToList(it.getElementsByTagName("taskseries")).map { createTaskSeriesEntity(taskSeriesListId, it) }
-            )
+        return rtmRequestUtil.convertToList(response.rootElement.getElementsByTagName("list")).map {
+            createTaskSeriesListEntity(it)
         }
-
-        return taskSeriesListEntityList
     }
 
-    fun createTaskSeriesEntity(taskSeriesListId:TaskSeriesListId, taskSeriesElement: Element): TaskSeriesEntity {
+    override fun addTask(token: Token, timelineId: TimelineId, name: TaskSeriesName, parse: Optional<Parse>): TransactionalResponse<TaskSeriesEntity> {
+        val rtmParams = HashMap<RtmParam, RtmParamValueObject>()
+        rtmParams.put(RtmParam.method, RtmMethod.tasks_add)
+        rtmParams.put(RtmParam.auth_token, token)
+        rtmParams.put(RtmParam.timeline, timelineId)
+        rtmParams.put(RtmParam.name_, name)
+        parse.ifPresent { rtmParams.put(RtmParam.parse, it) }
+
+        val response = rtmRequestUtil.requestXML(rtmParams).body
+        if(response.isFailed) {
+            throw RuntimeException(response.failedResponse!!.code + " " + response.failedResponse!!.msg)
+        }
+
+        val transactionElement = response.getFirstElementByTagName("transaction")
+
+        return TransactionalResponse(
+                Transaction(timelineId, TransactionId(transactionElement.getAttribute("id")), Undoable(transactionElement.getAttribute("undoable"))),
+                createTaskSeriesListEntity(response.getFirstElementByTagName("list")).taskSeriesEntityList.get(0))
+    }
+
+    fun createTaskSeriesListEntity(listElement: Element): TaskSeriesListEntity {
+        val taskSeriesListId = TaskSeriesListId(listElement.getAttribute("id"))
+
+        return TaskSeriesListEntity(
+                taskSeriesListId,
+                Optional.ofNullable(listElement.getAttribute("name")).filter { it.isNotEmpty() }.map { TaskSeriesListName(it) },
+                rtmRequestUtil.convertToList(listElement.getElementsByTagName("taskseries")).map { createTaskSeriesEntity(taskSeriesListId, it) }
+        )
+    }
+
+    fun createTaskSeriesEntity(taskSeriesListId: TaskSeriesListId, taskSeriesElement: Element): TaskSeriesEntity {
         val taskSeriesId = TaskSeriesId(taskSeriesElement.getAttribute("id"))
 
         val taskElement: Element = taskSeriesElement.getElementsByTagName("task").item(0) as Element
@@ -58,7 +86,7 @@ class RtmTaskRepositoryNet(val rtmApiConfig: RtmApiConfig): RtmTaskRepository {
                 taskIdSet,
                 TaskSeriesName(taskSeriesElement.getAttribute("name")),
                 taskEntity,
-                ArrayList(),// todo tag
+                ArrayList(), // todo tag
                 TaskSeriesSource(taskSeriesElement.getAttribute("source")),
                 TaskSeriesLocationid(taskSeriesElement.getAttribute("location_id")),
                 TaskSeriesDateTimes(

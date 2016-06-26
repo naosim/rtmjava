@@ -1,9 +1,8 @@
-package com.naosim.rtm.infra.datasource
+package com.naosim.rtm.infra.datasource.common
 
-import com.naosim.rtm.RtmApiConfig
-import com.naosim.rtm.infra.datasource.RtmParam
 import com.naosim.rtm.domain.model.RtmParamValueObject
 import com.naosim.rtm.domain.model.developer.ApiSig
+import com.naosim.rtm.infra.datasource.RtmApiConfig
 import com.naosim.rtm.lib.HttpRegularResult
 import com.naosim.rtm.lib.HttpRequestUtil
 import com.naosim.rtm.lib.StatusCodeOver400Exception
@@ -32,7 +31,7 @@ class RtmRequestUtil(val config: RtmApiConfig) {
 
     fun requestXML(rtmParamsExcludeApiSig: HashMap<RtmParam, RtmParamValueObject>): HttpRegularResult<RtmResponseXml> {
         return request(restBaseUrl, rtmParamsExcludeApiSig) {
-            RtmResponseXml(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it).firstChild as org.w3c.dom.Element)
+            RtmResponseXml(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it).firstChild as Element)
         }
     }
 

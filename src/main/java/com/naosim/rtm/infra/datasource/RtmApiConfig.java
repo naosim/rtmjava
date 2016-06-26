@@ -1,4 +1,4 @@
-package com.naosim.rtm;
+package com.naosim.rtm.infra.datasource;
 
 import com.naosim.rtm.domain.model.developer.ApiKey;
 import com.naosim.rtm.domain.model.developer.SharedSecret;
