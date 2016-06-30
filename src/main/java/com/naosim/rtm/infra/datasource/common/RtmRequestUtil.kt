@@ -38,6 +38,7 @@ class RtmRequestUtil(val config: RtmApiConfig) {
     fun <T> request(baseUrl: String, rtmParamsExcludeApiSig: HashMap<RtmParam, RtmParamValueObject>, proc: (InputStream) -> T): HttpRegularResult<T> {
         val rtmParams = HashMap<RtmParam, RtmParamValueObject>(rtmParamsExcludeApiSig)
         rtmParams.put(RtmParam.api_key, config.apiKey)
+        rtmParams.put(RtmParam.v, V2())
         if(rtmParams.containsKey(RtmParam.api_sig)) {
             throw RuntimeException("api_sigが既にある")
         }

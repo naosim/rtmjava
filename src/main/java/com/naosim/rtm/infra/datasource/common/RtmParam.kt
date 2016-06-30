@@ -14,7 +14,8 @@ enum class RtmParam(private val strValue: String? = null) {
     timeline(),
     name_("name"),
     parse(),
-    filter()
+    filter(),
+    v()
     ;
     val value = Optional.ofNullable(strValue).orElse(name)
 }
