@@ -2,7 +2,6 @@ package com.naosim.someapp;
 
 import com.naosim.rtm.domain.model.Filter;
 import com.naosim.rtm.domain.model.auth.*;
-import com.naosim.rtm.domain.model.task.Parse;
 import com.naosim.rtm.domain.model.task.TaskSeriesEntity;
 import com.naosim.rtm.domain.model.task.TaskSeriesListEntity;
 import com.naosim.rtm.domain.model.task.TaskSeriesName;
@@ -62,10 +61,15 @@ public class Main {
         List<TaskSeriesListEntity> taskSeriesListEntityList = rtmRepository.getTaskList(token, new Filter("(status:incomplete)or(completedAfter:25/06/2016)"));
         taskSeriesListEntityList.forEach(l -> {
             System.out.println("list: " + l.getTaskSeriesListName().map(v -> v.getValue()).orElse(""));
-            l.getTaskSeriesEntityList().forEach(s -> {
-                System.out.println(" " + s.getTaskSeriesName().getRtmParamValue() + " " + s.getTaskEntity().getTaskDateTimes().getTaskCompletedDateTimes().map(v -> v.getDateTime().toString()).orElse(""));
-            });
+            l.getTaskSeriesEntityList().forEach(Main::printTaskSeriesEntity);
         });
+    }
+
+    public static void printTaskSeriesEntity(TaskSeriesEntity taskSeriesEntity) {
+        if(taskSeriesEntity.getTaskEntity().getTaskDateTimes().getTaskCompletedDateTime().isPresent()) {
+            System.out.println("      " + taskSeriesEntity.getTaskSeriesName().getRtmParamValue() + " " + taskSeriesEntity.getTaskEntity().getTaskDateTimes().getTaskCompletedDateTime().map(v -> v.getDateTime().toString()).orElse(""));
+        }
+        System.out.println(" " + taskSeriesEntity.getTaskSeriesName().getRtmParamValue() + " " + taskSeriesEntity.getTaskEntity().getTaskDateTimes().getTaskCompletedDateTime().map(v -> v.getDateTime().toString()).orElse(""));
     }
 
 }

@@ -19,14 +19,16 @@ class TaskDue(val value: String) {};
 class TaskHasDueTime(val value: String) {};
 
 class TaskDateTimes(
-        val taskAddedDateTimes: TaskAddedDateTimes,
-        val taskCompletedDateTimes: Optional<TaskCompletedDateTimes>,
-        val taskDeletedDateTimes: Optional<TaskDeletedDateTimes>
+        val taskAddedDateTime: TaskAddedDateTime,
+        val taskCompletedDateTime: Optional<TaskCompletedDateTime>,
+        val taskDeletedDateTime: Optional<TaskDeletedDateTime>,
+        val taskStartDateTime: Optional<TaskStartDateTime>
 ) {};
 
-class TaskAddedDateTimes(val dateTime: LocalDateTime) {};
-class TaskCompletedDateTimes(val dateTime: LocalDateTime) {};
-class TaskDeletedDateTimes(val dateTime: LocalDateTime) {};
+class TaskAddedDateTime(val dateTime: LocalDateTime) {};
+class TaskCompletedDateTime(val dateTime: LocalDateTime) {};
+class TaskDeletedDateTime(val dateTime: LocalDateTime) {};
+class TaskStartDateTime(val dateTime: LocalDateTime) {};
 
 class TaskPostponed(val value: String) {};
 class TaskEstimate(val value: String) {};
