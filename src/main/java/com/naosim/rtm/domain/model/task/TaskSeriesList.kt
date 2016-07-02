@@ -1,5 +1,6 @@
 package com.naosim.rtm.domain.model.task
 
+import com.naosim.rtm.domain.model.RtmParamValueObject
 import java.util.*
 
 class TaskSeriesListEntity(
@@ -9,5 +10,7 @@ class TaskSeriesListEntity(
 
 ) {}
 
-class TaskSeriesListId(val value: String){}
+class TaskSeriesListId(val value: String) : RtmParamValueObject {
+    override val rtmParamValue: String = value
+}
 class TaskSeriesListName(val value: String){}

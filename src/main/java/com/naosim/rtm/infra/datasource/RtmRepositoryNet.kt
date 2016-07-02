@@ -14,7 +14,7 @@ import java.util.*
 class RtmRepositoryNet(val rtmApiConfig: RtmApiConfig, val rtmAuthRepository: RtmAuthRepository, val rtmTaskRepository: RtmTaskRepository): RtmRepository, RtmAuthRepository by rtmAuthRepository, RtmTaskRepository by rtmTaskRepository {
     private val rtmRequestUtil = RtmRequestUtil(rtmApiConfig)
 
-    fun createTimeline(token: Token): TimelineId {
+    override fun createTimeline(token: Token): TimelineId {
         val rtmParams = HashMap<RtmParam, RtmParamValueObject>()
         rtmParams.put(RtmParam.method, RtmMethod.timelines_create)
         rtmParams.put(RtmParam.auth_token, token)

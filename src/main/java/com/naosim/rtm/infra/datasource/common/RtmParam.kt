@@ -15,7 +15,11 @@ enum class RtmParam(private val strValue: String? = null) {
     name_("name"),
     parse(),
     filter(),
-    v()
+    start(),
+    v(),
+    list_id(),
+    taskseries_id(),
+    task_id()
     ;
     val value = Optional.ofNullable(strValue).orElse(name)
 }

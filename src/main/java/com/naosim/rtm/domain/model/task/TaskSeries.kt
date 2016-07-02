@@ -16,7 +16,9 @@ class TaskSeriesEntity(
     val taskSeriesId: TaskSeriesId = taskIdSet.taskSeriesId
 }
 
-class TaskSeriesId(val value: String) {}
+class TaskSeriesId(val value: String): RtmParamValueObject {
+    override val rtmParamValue: String = value
+}
 
 class TaskSeriesDateTimes(
         val taskSeriesCreatedDateTime: TaskSeriesCreatedDateTime,

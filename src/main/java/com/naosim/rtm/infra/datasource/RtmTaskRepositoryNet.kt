@@ -53,6 +53,50 @@ class RtmTaskRepositoryNet(val rtmApiConfig: RtmApiConfig): RtmTaskRepository {
                 createTaskSeriesListEntity(response.getFirstElementByTagName("list")).taskSeriesEntityList.get(0))
     }
 
+    override fun completeTask(token: Token, timelineId: TimelineId, taskIdSet: TaskIdSet): TransactionalResponse<TaskSeriesEntity> {
+        val rtmParams = HashMap<RtmParam, RtmParamValueObject>()
+        rtmParams.put(RtmParam.method, RtmMethod.tasks_complete)
+        rtmParams.put(RtmParam.auth_token, token)
+        rtmParams.put(RtmParam.timeline, timelineId)
+        rtmParams.put(RtmParam.list_id, taskIdSet.listId)
+        rtmParams.put(RtmParam.taskseries_id, taskIdSet.taskSeriesId)
+        rtmParams.put(RtmParam.task_id, taskIdSet.taskId)
+
+        val response = rtmRequestUtil.requestXML(rtmParams).body
+        if(response.isFailed) {
+            throw RuntimeException(response.failedResponse!!.code + " " + response.failedResponse!!.msg)
+        }
+
+        val transactionElement = response.getFirstElementByTagName("transaction")
+
+        return TransactionalResponse(
+                Transaction(timelineId, TransactionId(transactionElement.getAttribute("id")), Undoable(transactionElement.getAttribute("undoable"))),
+                createTaskSeriesListEntity(response.getFirstElementByTagName("list")).taskSeriesEntityList.get(0))
+    }
+
+    override fun updateStartDateTime(token: Token, timelineId: TimelineId, taskIdSet: TaskIdSet, startDateTime: Optional<TaskStartDateTime>): TransactionalResponse<TaskSeriesEntity> {
+        val rtmParams = HashMap<RtmParam, RtmParamValueObject>()
+        rtmParams.put(RtmParam.method, RtmMethod.tasks_setstartdate)
+        rtmParams.put(RtmParam.auth_token, token)
+        rtmParams.put(RtmParam.timeline, timelineId)
+        rtmParams.put(RtmParam.list_id, taskIdSet.listId)
+        rtmParams.put(RtmParam.taskseries_id, taskIdSet.taskSeriesId)
+        rtmParams.put(RtmParam.task_id, taskIdSet.taskId)
+        startDateTime.ifPresent { rtmParams.put(RtmParam.start, it) }
+
+
+        val response = rtmRequestUtil.requestXML(rtmParams).body
+        if(response.isFailed) {
+            throw RuntimeException(response.failedResponse!!.code + " " + response.failedResponse!!.msg)
+        }
+
+        val transactionElement = response.getFirstElementByTagName("transaction")
+
+        return TransactionalResponse(
+                Transaction(timelineId, TransactionId(transactionElement.getAttribute("id")), Undoable(transactionElement.getAttribute("undoable"))),
+                createTaskSeriesListEntity(response.getFirstElementByTagName("list")).taskSeriesEntityList.get(0))
+    }
+
     fun createTaskSeriesListEntity(listElement: Element): TaskSeriesListEntity {
         val taskSeriesListId = TaskSeriesListId(listElement.getAttribute("id"))
 

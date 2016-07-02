@@ -8,6 +8,8 @@ enum class RtmMethod(override val rtmParamValue: String) : RtmParamValueObject {
     auth_checktoken("rtm.auth.checkToken"),
     tasks_getlist("rtm.tasks.getList"),
     tasks_add("rtm.tasks.add"),
+    tasks_complete("rtm.tasks.complete"),
+    tasks_setstartdate("rtm.tasks.setStartDate"),
     timelines_create("rtm.timelines.create")
     ;
 }

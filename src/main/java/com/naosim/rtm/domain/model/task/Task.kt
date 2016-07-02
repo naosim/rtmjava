@@ -1,6 +1,8 @@
 package com.naosim.rtm.domain.model.task
 
+import com.naosim.rtm.domain.model.RtmParamValueObject
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 class TaskEntity (
@@ -14,7 +16,9 @@ class TaskEntity (
     val taskId: TaskId = taskIdSet.taskId
 }
 
-class TaskId(val value: String) {};
+class TaskId(val value: String): RtmParamValueObject {
+    override val rtmParamValue: String = value
+}
 class TaskDue(val value: String) {};
 class TaskHasDueTime(val value: String) {};
 
@@ -28,7 +32,9 @@ class TaskDateTimes(
 class TaskAddedDateTime(val dateTime: LocalDateTime) {};
 class TaskCompletedDateTime(val dateTime: LocalDateTime) {};
 class TaskDeletedDateTime(val dateTime: LocalDateTime) {};
-class TaskStartDateTime(val dateTime: LocalDateTime) {};
+class TaskStartDateTime(val dateTime: LocalDateTime): RtmParamValueObject {
+    override val rtmParamValue: String = dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+};
 
 class TaskPostponed(val value: String) {};
 class TaskEstimate(val value: String) {};
