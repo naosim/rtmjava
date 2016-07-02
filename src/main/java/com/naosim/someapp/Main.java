@@ -2,16 +2,15 @@ package com.naosim.someapp;
 
 import com.naosim.rtm.domain.model.Filter;
 import com.naosim.rtm.domain.model.auth.*;
-import com.naosim.rtm.domain.model.task.TaskSeriesEntity;
-import com.naosim.rtm.domain.model.task.TaskSeriesListEntity;
-import com.naosim.rtm.domain.model.task.TaskSeriesName;
+import com.naosim.rtm.domain.model.task.*;
 import com.naosim.rtm.domain.model.timeline.TimelineId;
 import com.naosim.rtm.domain.model.timeline.TransactionalResponse;
 import com.naosim.rtm.domain.repository.RtmRepository;
-import com.naosim.someapp.infra.datasource.AuthRepository;
 import com.naosim.rtm.infra.datasource.RtmRepositoryNet;
 import com.naosim.rtm.infra.datasource.RtmRepositoryNetFactory;
+import com.naosim.someapp.infra.datasource.AuthRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +23,9 @@ public class Main {
 
         Token token = getTokenAtLocal(authRepository, rtmRepository);
         showTasks(rtmRepository, token);
+
+        start(rtmRepository, token);
+
     }
 
     public static Token login(RtmRepositoryNet rtmRepository) throws InterruptedException {
@@ -68,8 +70,44 @@ public class Main {
     public static void printTaskSeriesEntity(TaskSeriesEntity taskSeriesEntity) {
         if(taskSeriesEntity.getTaskEntity().getTaskDateTimes().getTaskCompletedDateTime().isPresent()) {
             System.out.println("      " + taskSeriesEntity.getTaskSeriesName().getRtmParamValue() + " " + taskSeriesEntity.getTaskEntity().getTaskDateTimes().getTaskCompletedDateTime().map(v -> v.getDateTime().toString()).orElse(""));
+        } else {
+            System.out.println(
+                    String.format(
+                            "%s %s %s %s",
+                            taskSeriesEntity.getTaskSeriesName().getRtmParamValue(),
+                            taskSeriesEntity.getTaskIdSet().getListId().getValue(),
+                            taskSeriesEntity.getTaskIdSet().getTaskSeriesId().getValue(),
+                            taskSeriesEntity.getTaskIdSet().getTaskId().getValue()
+                    )
+            );
         }
-        System.out.println(" " + taskSeriesEntity.getTaskSeriesName().getRtmParamValue() + " " + taskSeriesEntity.getTaskEntity().getTaskDateTimes().getTaskCompletedDateTime().map(v -> v.getDateTime().toString()).orElse(""));
+
     }
 
+    public static void complete(RtmRepositoryNet rtmRepository, Token token) {
+        //9905184 294849864 505043442
+        TimelineId timelineId = rtmRepository.createTimeline(token);
+        TransactionalResponse<TaskSeriesEntity> res = rtmRepository.completeTask(token, timelineId, new TaskIdSet(
+                new TaskSeriesListId("9905184"),
+                new TaskSeriesId("294849864"),
+                new TaskId("505043442")
+        ));
+
+        System.out.println(res.getResponse().getTaskSeriesName().getRtmParamValue());
+
+    }
+
+    public static void start(RtmRepositoryNet rtmRepository, Token token) {
+        //9905184 294850724 505046081
+        TimelineId timelineId = rtmRepository.createTimeline(token);
+        TransactionalResponse<TaskSeriesEntity> res = rtmRepository.updateStartDateTime(token, timelineId, new TaskIdSet(
+                new TaskSeriesListId("9905184"),
+                new TaskSeriesId("294850724"),
+                new TaskId("505046081")
+        ),
+                new TaskStartDateTime(LocalDateTime.now()));
+
+        System.out.println(res.getResponse().getTaskEntity().getTaskDateTimes().getTaskStartDateTime().map(TaskStartDateTime::getDateTime));
+
+    }
 }
