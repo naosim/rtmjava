@@ -33,13 +33,13 @@ class RtmTaskRepositoryNet(val rtmApiConfig: RtmApiConfig): RtmTaskRepository {
         }
     }
 
-    override fun addTask(token: Token, timelineId: TimelineId, name: TaskSeriesName, parse: Optional<Parse>): TransactionalResponse<TaskSeriesEntity> {
+    override fun addTask(token: Token, timelineId: TimelineId, name: TaskSeriesName/*, parse: Optional<Parse> うまく動作しない */): TransactionalResponse<TaskSeriesEntity> {
         val rtmParams = HashMap<RtmParam, RtmParamValueObject>()
         rtmParams.put(RtmParam.method, RtmMethod.tasks_add)
         rtmParams.put(RtmParam.auth_token, token)
         rtmParams.put(RtmParam.timeline, timelineId)
         rtmParams.put(RtmParam.name_, name)
-        parse.ifPresent { rtmParams.put(RtmParam.parse, it) }
+//        parse.ifPresent { rtmParams.put(RtmParam.parse, it) }
 
         val response = rtmRequestUtil.requestXML(rtmParams).body
         if(response.isFailed) {

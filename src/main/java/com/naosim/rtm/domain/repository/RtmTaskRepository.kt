@@ -9,7 +9,7 @@ import java.util.*
 
 interface RtmTaskRepository {
     fun getTaskList(token: Token, filter: Filter? = null): List<TaskSeriesListEntity>
-    fun addTask(token: Token, timelineId: TimelineId, name: TaskSeriesName, parse: Optional<Parse>): TransactionalResponse<TaskSeriesEntity>
+    fun addTask(token: Token, timelineId: TimelineId, name: TaskSeriesName/*, parse: Optional<Parse> うまく動作しない */): TransactionalResponse<TaskSeriesEntity>
     fun completeTask(token: Token, timelineId: TimelineId, taskIdSet: TaskIdSet): TransactionalResponse<TaskSeriesEntity>
     fun updateStartDateTime(token: Token, timelineId: TimelineId, taskIdSet: TaskIdSet, startDateTime: Optional<TaskStartDateTime>): TransactionalResponse<TaskSeriesEntity>
 }
