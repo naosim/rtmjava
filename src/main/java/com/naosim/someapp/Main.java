@@ -22,9 +22,10 @@ public class Main {
 //        login(rtmRepository);
 
         Token token = getTokenAtLocal(authRepository, rtmRepository);
-        showTasks(rtmRepository, token);
 
-        start(rtmRepository, token);
+        addTask(rtmRepository, token);
+//        showTasks(rtmRepository, token);
+//        start(rtmRepository, token);
 
     }
 
@@ -53,10 +54,12 @@ public class Main {
 
     public static void addTask(RtmRepositoryNet rtmRepository, Token token) {
         TimelineId timelineId = rtmRepository.createTimeline(token);
-        TransactionalResponse<TaskSeriesEntity> res = rtmRepository.addTask(token, timelineId, new TaskSeriesName("barbar"), Optional.empty());
+        TransactionalResponse<TaskSeriesEntity> res = rtmRepository.addTask(token, timelineId, new TaskSeriesName("barbar4"));
+        res = rtmRepository.updateStartDateTime(token, timelineId, res.getResponse().getTaskIdSet(), Optional.of(new TaskStartDateTime(LocalDateTime.of(2016, 7, 5, 12, 0))));
 
         System.out.println(res.getTransaction().getTransactionId().getRtmParamValue());
         System.out.println(res.getResponse().getTaskSeriesName().getRtmParamValue());
+        System.out.println(res.getResponse().getTaskEntity().getTaskDateTimes().getTaskStartDateTime().get().getRtmParamValue());
     }
 
     public static void showTasks(RtmRepository rtmRepository, Token token) {
@@ -105,7 +108,8 @@ public class Main {
                 new TaskSeriesId("294850724"),
                 new TaskId("505046081")
         ),
-                new TaskStartDateTime(LocalDateTime.now()));
+                Optional.of(new TaskStartDateTime(LocalDateTime.now()))
+        );
 
         System.out.println(res.getResponse().getTaskEntity().getTaskDateTimes().getTaskStartDateTime().map(TaskStartDateTime::getDateTime));
 
