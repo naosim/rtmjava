@@ -1,4 +1,6 @@
-package com.naosim.rtm.domain.model
+package com.naosim.rtm.domain.model.auth
+
+import com.naosim.rtm.domain.model.RtmParamValueObject
 
 class UserId(override val rtmParamValue: String) : RtmParamValueObject {}
 class UserName(override val rtmParamValue: String) : RtmParamValueObject {}

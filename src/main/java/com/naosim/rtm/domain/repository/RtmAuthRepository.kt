@@ -1,5 +1,6 @@
-package com.naosim.rtm.domain.model
+package com.naosim.rtm.domain.repository
 
+import com.naosim.rtm.domain.model.auth.GetTokenResponse
 import com.naosim.rtm.domain.model.auth.*
 import java.util.*
 

@@ -1,15 +1,12 @@
 package com.naosim.rtm.infra.datasource
 
-import com.naosim.rtm.RtmApiConfig
-import com.naosim.rtm.RtmApiConfigImpl
-import com.naosim.rtm.domain.model.*
+import com.naosim.rtm.domain.model.RtmParamValueObject
 import com.naosim.rtm.domain.model.auth.*
 import com.naosim.rtm.domain.model.developer.ApiSig
+import com.naosim.rtm.domain.repository.RtmAuthRepository
+import com.naosim.rtm.infra.datasource.common.*
 import com.naosim.rtm.lib.HttpRequestUtil
-import org.w3c.dom.Element
-import org.w3c.dom.NodeList
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import com.naosim.someapp.RtmApiConfigImpl
 import java.util.*
 
 class RtmAuthRepositoryNet(val rtmApiConfig: RtmApiConfig): RtmAuthRepository {
@@ -34,6 +31,7 @@ class RtmAuthRepositoryNet(val rtmApiConfig: RtmApiConfig): RtmAuthRepository {
         rtmParams.put(RtmParam.api_key, API_KEY)
         rtmParams.put(RtmParam.perms, RtmPerms.delete);
         rtmParams.put(RtmParam.frob, frob);
+        rtmParams.put(RtmParam.v, V2());
         rtmParams.put(RtmParam.api_sig, ApiSig(SHARED_SECRET, rtmParams))
 
         return rtmRequestUtil.authBaseUrl + "?" + HttpRequestUtil.createQuery(rtmParams, { it.value }, { it.rtmParamValue })

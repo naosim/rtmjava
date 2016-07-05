@@ -1,7 +1,5 @@
-package com.naosim.rtm.infra.datasource
-import org.w3c.dom.Element;
-import org.w3c.dom.Node
-import java.util.*
+package com.naosim.rtm.infra.datasource.common
+import org.w3c.dom.Element
 
 class RtmResponseXml(val rootElement: Element) {
     val isOk = rootElement.getAttribute("stat") == "ok"
