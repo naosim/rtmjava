@@ -8,22 +8,39 @@ import com.naosim.rtm.domain.model.timeline.TransactionalResponse;
 import com.naosim.rtm.domain.repository.RtmRepository;
 import com.naosim.rtm.infra.datasource.RtmRepositoryNet;
 import com.naosim.rtm.infra.datasource.RtmRepositoryNetFactory;
+import com.naosim.someapp.domain.タスク名;
+import com.naosim.someapp.domain.タスク消化予定日;
 import com.naosim.someapp.infra.datasource.AuthRepository;
+import com.naosim.someapp.infra.datasource.タスクRepositoryWithRTM;
+import spark.Request;
+import spark.Response;
+import spark.utils.StringUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
+import static spark.Spark.*;
 public class Main {
-    public static void main(String... args) throws InterruptedException {
+    public static void main(String[] args) {
+        get("/hello", (req, res) -> {
+            タスク名 taskName = getRequiredValue("name", タスク名::new, req, res);
+            return "hello";
+        });
+    }
+
+    public static void main2(String... args) throws InterruptedException {
         RtmRepositoryNet rtmRepository = new RtmRepositoryNetFactory().create(new RtmApiConfigImpl());
         AuthRepository authRepository = new AuthRepository();
 
 //        login(rtmRepository);
 
         Token token = getTokenAtLocal(authRepository, rtmRepository);
-
-        addTask(rtmRepository, token);
+//        addTask(rtmRepository, token);
+        タスク追加(token, rtmRepository);
 //        showTasks(rtmRepository, token);
 //        start(rtmRepository, token);
 
@@ -55,7 +72,8 @@ public class Main {
     public static void addTask(RtmRepositoryNet rtmRepository, Token token) {
         TimelineId timelineId = rtmRepository.createTimeline(token);
         TransactionalResponse<TaskSeriesEntity> res = rtmRepository.addTask(token, timelineId, new TaskSeriesName("barbar4"));
-        res = rtmRepository.updateStartDateTime(token, timelineId, res.getResponse().getTaskIdSet(), Optional.of(new TaskStartDateTime(LocalDateTime.of(2016, 7, 5, 12, 0))));
+//        res = rtmRepository.updateStartDateTime(token, timelineId, res.getResponse().getTaskIdSet(), Optional.of(new TaskStartDateTime(LocalDateTime.of(2016, 7, 8, 12, 0))));
+        res = rtmRepository.updateDueDateTime(token, timelineId, res.getResponse().getTaskIdSet(), Optional.of(new TaskDueDateTime(LocalDateTime.of(2016, 7, 8, 12, 0))));
 
         System.out.println(res.getTransaction().getTransactionId().getRtmParamValue());
         System.out.println(res.getResponse().getTaskSeriesName().getRtmParamValue());
@@ -114,4 +132,28 @@ public class Main {
         System.out.println(res.getResponse().getTaskEntity().getTaskDateTimes().getTaskStartDateTime().map(TaskStartDateTime::getDateTime));
 
     }
+
+    public static void タスク追加(Token token, RtmRepositoryNet rtmRepository) {
+        タスクRepositoryWithRTM タスクRepositoryWithRTM = new タスクRepositoryWithRTM(token, rtmRepository);
+        タスクRepositoryWithRTM.追加(new タスク名("hoge"), new タスク消化予定日(LocalDate.of(2016,7,7)));
+    }
+
+    public static <T> T getRequiredValue(String key, Function<String, T> convert, Request req, Response resForError) {
+        if(StringUtils.isEmpty(req.queryParams(key))) {
+            throw new RuntimeException("required: " + key);
+        }
+        return convert.apply(req.queryParams(key));
+    }
+
+    //--いかUC
+    /*
+    checktoken(token)
+    getloginurl(): flob, url
+    gettolen(token)
+    addtask(token, name, startdate)
+    donetask(token, taskid)
+    setstartdate(token, startdate)
+
+
+     */
 }

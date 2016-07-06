@@ -11,9 +11,9 @@ class タスクRepositoryWithRTM(val token: Token, val rtmRepository: RtmReposit
     val タスクIDConverter = タスクIDConverter()
     override fun 追加(タスク名: タスク名, タスク消化予定日Optional: タスク消化予定日Optional): タスクEntity {
         val timeline = rtmRepository.createTimeline(token)
-        val taskStartDateTimeOptional = タスク消化予定日Optional.get().map{ TaskStartDateTime(it.localDate.atStartOfDay()) }
+        val taskDueDateTimeOptional = タスク消化予定日Optional.get().map{ TaskDueDateTime(it.localDate.atStartOfDay()) }
         val taskIdSet = rtmRepository.addTask(token, timeline, TaskSeriesName(タスク名.value)).response.taskIdSet
-        rtmRepository.updateStartDateTime(token, timeline, taskIdSet, taskStartDateTimeOptional)
+        rtmRepository.updateDueDateTime(token, timeline, taskIdSet, taskDueDateTimeOptional)
         val タスクID = タスクIDConverter.createタスクID(taskIdSet)
         return タスクEntityWithRTM(
                 タスクID,
