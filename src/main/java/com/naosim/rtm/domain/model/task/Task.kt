@@ -35,6 +35,9 @@ class TaskDeletedDateTime(val dateTime: LocalDateTime) {};
 class TaskStartDateTime(val dateTime: LocalDateTime): RtmParamValueObject {
     override val rtmParamValue: String = dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
 };
+class TaskDueDateTime(val dateTime: LocalDateTime): RtmParamValueObject {
+    override val rtmParamValue: String = dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+};
 
 class TaskPostponed(val value: String) {};
 class TaskEstimate(val value: String) {};
