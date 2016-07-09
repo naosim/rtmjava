@@ -1,5 +1,6 @@
 package com.naosim.someapp;
 
+import com.google.gson.Gson;
 import com.naosim.rtm.domain.model.Filter;
 import com.naosim.rtm.domain.model.auth.*;
 import com.naosim.rtm.domain.model.task.*;
@@ -10,25 +11,61 @@ import com.naosim.rtm.infra.datasource.RtmRepositoryNet;
 import com.naosim.rtm.infra.datasource.RtmRepositoryNetFactory;
 import com.naosim.someapp.domain.タスク名;
 import com.naosim.someapp.domain.タスク消化予定日;
+import com.naosim.someapp.infra.MapConverter;
+import com.naosim.someapp.infra.RepositoryFactory;
+import com.naosim.someapp.infra.api.HelloApi;
+import com.naosim.someapp.infra.api.auth.checktoken.AuthCheckTokenApi;
+import com.naosim.someapp.infra.api.auth.getauthurl.AuthGetAuthUrlApi;
+import com.naosim.someapp.infra.api.auth.gettoken.AuthGetTokenApi;
+import com.naosim.someapp.infra.api.task.add.TaskAddApi;
+import com.naosim.someapp.infra.api.lib.Api;
+import com.naosim.someapp.infra.api.task.list.TaskListApi;
 import com.naosim.someapp.infra.datasource.AuthRepository;
 import com.naosim.someapp.infra.datasource.タスクRepositoryWithRTM;
-import spark.Request;
-import spark.Response;
-import spark.utils.StringUtils;
+import spark.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static spark.Spark.*;
+import static spark.utils.StringUtils.isEmpty;
+
 public class Main {
     public static void main(String[] args) {
-        get("/hello", (req, res) -> {
-            タスク名 taskName = getRequiredValue("name", タスク名::new, req, res);
-            return "hello";
+        RepositoryFactory repositoryFactory = new RepositoryFactory();
+        Gson gson = new Gson();
+        Api[] apiList = {
+                new HelloApi(),
+                new TaskAddApi(repositoryFactory),
+                new TaskListApi(repositoryFactory),
+                new AuthCheckTokenApi(repositoryFactory),
+                new AuthGetAuthUrlApi(repositoryFactory),
+                new AuthGetTokenApi(repositoryFactory)
+        };
+        Stream.of(apiList).forEach(api -> get("/api/v1/json" + api.getPath(), api::router, gson::toJson));
+        Stream.of(apiList).forEach(api -> get("/api/v1/jsonp" + api.getPath(), (req, res) -> {
+            String callbackFunction = req.queryParams("callback");
+            if(isEmpty(callbackFunction)) {
+                throw new RuntimeException("callback not found");
+            }
+            try {
+                Object obj = api.router(req, res);
+                return "" + callbackFunction + "(" + gson.toJson(obj) + ");";
+            } catch(RuntimeException e) {
+                res.status(500);
+                return "" + callbackFunction + "(" + gson.toJson(new MapConverter().apiErrorResult(400, e.getMessage())) + ");";
+            }
+        }));
+
+
+        exception(RuntimeException.class, (exception, request, response) -> {
+            // Handle the exception here
+            response.status(500);
+            response.body(gson.toJson(new MapConverter().apiErrorResult(400, exception.getMessage())));
         });
     }
 
@@ -138,11 +175,11 @@ public class Main {
         タスクRepositoryWithRTM.追加(new タスク名("hoge"), new タスク消化予定日(LocalDate.of(2016,7,7)));
     }
 
-    public static <T> T getRequiredValue(String key, Function<String, T> convert, Request req, Response resForError) {
-        if(StringUtils.isEmpty(req.queryParams(key))) {
+    public static <T> T getRequiredValue(String key, Function<String, T> convert, QueryParamsMap queryParamsMap) {
+        if(isEmpty(queryParamsMap.value(key))) {
             throw new RuntimeException("required: " + key);
         }
-        return convert.apply(req.queryParams(key));
+        return convert.apply(queryParamsMap.value(key));
     }
 
     //--いかUC
@@ -156,4 +193,14 @@ public class Main {
 
 
      */
+
+
+
+    public static class JsonpApiWrapper implements Route {
+
+        @Override
+        public Object handle(Request request, Response response) throws Exception {
+            return null;
+        }
+    }
 }
