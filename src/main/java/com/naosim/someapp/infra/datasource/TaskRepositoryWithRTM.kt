@@ -47,7 +47,7 @@ class タスクRepositoryWithRTM(val token: Token, val rtmRepository: RtmReposit
                 .map { it.taskSeriesEntityList }
                 .reduce { a, b -> a.plus(b) }
                 .map { convertTaskSeriesEntityToタスクEntity(it) }
-                .sorted()
+//                .sorted()
         return タスクEntityList
     }
 }
