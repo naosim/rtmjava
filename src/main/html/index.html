@@ -1,5 +1,95 @@
-<!DOCYTPE html>
+<!DOCTYPE html>
+<div id="app">
+  <h1>My TODO</h1>
+  <p>
+    <!-- ナビゲーション向けに v-link ディレクティブを使用 -->
+    <a v-link="{ path: '/' }">Go to First</a>
+    <a v-link="{ path: '/bar' }">Go to Bar</a>
+  </p>
+  <!-- route outlet -->
+  <router-view></router-view>
+</div>
+
+<template id="login-template">
+  <a v-link="{ path: '/foo' }">Login</a>
+</template>
+
 <script src="https://cdn.jsdelivr.net/vue/1.0.26/vue.min.js"></script>
+<script src="https://cdn.jsdelivr.net/vue.router/0.7.10/vue-router.min.js"></script>
 <script src="https://cdn.jsdelivr.net/vue.resource/0.9.3/vue-resource.min.js"></script>
 <script>
+var urlbase = 'http://localhost:4567/api/v1/jsonp'
+var model = {
+  auth: {
+    token: null,
+    checkToken: {
+      result: false,
+      checkStartDate: null,
+      lastCheckDate: null
+    }
+  },
+  taskList: []
+}
+
+var First = Vue.extend({
+  template: '#login-template',
+  data: () => model,
+  created: function() {
+
+    if(this.$data.auth.token) {
+      // トークンが有れば次へ
+      router.go('/main');
+    } else {
+      // 無ければログイン
+      // flob取得
+      // サーバ
+    }
+  }
+})
+// いくつかのコンポーネントを定義します
+// var Login = Vue.extend({
+//     template: '#login-template'
+// })
+
+var Main = Vue.extend({
+    template: '<p>This is Main!</p>',
+    data: () => model,
+    watch: {
+      'auth.token': (val, oldVal) => {
+        if(!val) {
+          router.go('/');
+        }
+      }
+    },
+    created: function() {
+      console.log("created main");
+      this.$http.jsonp(`${urlbase}/task/list?token=${this.$data.auth.token}`).then(function (data, status, request) {
+                //GETメソッドが成功した場合の処理
+                console.log(data);
+            }, function (data, status, request) {
+                //GETメソッドが失敗した場合の処理
+                console.log(data);
+            })
+    }
+})
+
+
+// router は、レンダリングするために1つの root コンポーネントが必要です
+// デモ目的向けで、app テンプレートとして HTML を使用しているため、空を使用します
+var App = Vue.extend({})
+
+// router インスタンスを作成。
+// ここでは追加的なオプションで渡すことができますが、今はシンプルに保っています
+var router = new VueRouter()
+router.map({
+  '/': {
+    component: First
+  },
+    '/main': {
+        component: Main
+    }
+})
+router.start(App, '#app')
+
+
 </script>
