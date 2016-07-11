@@ -14,11 +14,85 @@
   <a v-link="{ path: '/foo' }">Login</a>
 </template>
 
+<template id="tasklist-template">
+  <h3>今日 {{today}}</h3>
+  <ul>
+    <li v-for="task in todayTaskList" style="{{task.task_completed_date_optional ? 'text-decoration: line-through;' : ''}}">
+      {{ task.task_name }} {{task.task_end_date_optional}}
+    </li>
+  </ul>
+
+  <hr>
+  <h3>明日 {{day2}}</h3>
+  <ul>
+    <li v-for="task in day2TaskList" style="{{task.task_completed_date_optional ? 'text-decoration: line-through;' : ''}}">
+      {{ task.task_name }} {{task.task_end_date_optional}}
+    </li>
+  </ul>
+
+  <hr>
+  <h3>明後日 {{day3}}</h3>
+  <ul>
+    <li v-for="task in day3TaskList" style="{{task.task_completed_date_optional ? 'text-decoration: line-through;' : ''}}">
+      {{ task.task_name }} {{task.task_end_date_optional}}
+    </li>
+  </ul>
+
+  <hr>
+  <h3>3日後 {{day4}}</h3>
+  <ul>
+    <li v-for="task in day4TaskList" style="{{task.task_completed_date_optional ? 'text-decoration: line-through;' : ''}}">
+      {{ task.task_name }} {{task.task_end_date_optional}}
+    </li>
+  </ul>
+
+  <hr>
+  <h3>4日後 {{day5}}</h3>
+  <ul>
+    <li v-for="task in day5TaskList" style="{{task.task_completed_date_optional ? 'text-decoration: line-through;' : ''}}">
+      {{ task.task_name }} {{task.task_end_date_optional}}
+    </li>
+  </ul>
+
+  <hr>
+  <h3>5日後 {{day6}}</h3>
+  <ul>
+    <li v-for="task in day6TaskList" style="{{task.task_completed_date_optional ? 'text-decoration: line-through;' : ''}}">
+      {{ task.task_name }} {{task.task_end_date_optional}}
+    </li>
+  </ul>
+
+  <hr>
+  <h3>6日後 {{day7}}</h3>
+  <ul>
+    <li v-for="task in day7TaskList" style="{{task.task_completed_date_optional ? 'text-decoration: line-through;' : ''}}">
+      {{ task.task_name }} {{task.task_end_date_optional}}
+    </li>
+  </ul>
+
+  <hr>
+  <h3>以降</h3>
+  <ul>
+    <li v-for="task in otherTaskList" style="{{task.task_completed_date_optional ? 'text-decoration: line-through;' : ''}}">
+      {{ task.task_name }} {{task.task_end_date_optional}}
+    </li>
+  </ul>
+
+  <hr>
+  <h3>BACKLOG</h3>
+  <ul>
+    <li v-for="task in backlogTaskList" style="{{task.task_completed_date_optional ? 'text-decoration: line-through;' : ''}}">
+      {{ task.task_name }} {{task.task_end_date_optional}}
+    </li>
+  </ul>
+</template>
+
 <script src="https://cdn.jsdelivr.net/vue/1.0.26/vue.min.js"></script>
 <script src="https://cdn.jsdelivr.net/vue.router/0.7.10/vue-router.min.js"></script>
 <script src="https://cdn.jsdelivr.net/vue.resource/0.9.3/vue-resource.min.js"></script>
 <script>
 var urlbase = 'http://localhost:4567/api/v1/jsonp'
+var serverResponseSample = [];
 var model = {
   auth: {
     token: null,
@@ -29,6 +103,13 @@ var model = {
     }
   },
   taskList: []
+}
+
+var formatDate = function(format, date) {
+  var year = date.getYear();
+  var month = ("0" + (date.getMonth() + 1)).slice(-2);
+  var dayofmonth = ("0" + date.getDate()).slice(-2);
+  return format.split('YYYY').join(year).split('MM').join(month).split('DD').join(dayofmonth);
 }
 
 var First = Vue.extend({
@@ -51,8 +132,11 @@ var First = Vue.extend({
 //     template: '#login-template'
 // })
 
+var day = (num) => new Date(Date.now() + 24 * 60 * 60 * 1000 * num);
+var formatedDay = (num) => formatDate('MM/DD', day(num));
+
 var Main = Vue.extend({
-    template: '<p>This is Main!</p>',
+    template: '#tasklist-template',
     data: () => model,
     watch: {
       'auth.token': (val, oldVal) => {
@@ -61,15 +145,124 @@ var Main = Vue.extend({
         }
       }
     },
-    created: function() {
+    computed: {
+      today: () => formatedDay(0),
+      day2: () => formatedDay(1),
+      day3: () => formatedDay(2),
+      day4: () => formatedDay(3),
+      day5: () => formatedDay(4),
+      day6: () => formatedDay(5),
+      day7: () => formatedDay(6),
+      todayTaskList: function() {
+        var nextDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        var end = new Date(formatDate('YYYY-MM-DD 00:00:00', nextDay));
+        return this.taskList.filter(v => {
+          if(!v.task_end_date_optional) return false;
+          return end.getTime() < v.task_end_date_optional.getTime();
+        })
+      },
+      day2TaskList: function() {
+        var start = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 1)));
+        var end   = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 2)));
+        return this.taskList.filter(v => {
+          if(!v.task_end_date_optional) return false;
+          return start.getTime() >= v.task_end_date_optional.getTime() && end.getTime() < v.task_end_date_optional.getTime();
+        })
+      },
+      day3TaskList: function() {
+        var start = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 2)));
+        var end   = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 3)));
+        return this.taskList.filter(v => {
+          if(!v.task_end_date_optional) return false;
+          return start.getTime() >= v.task_end_date_optional.getTime() && end.getTime() < v.task_end_date_optional.getTime();
+        })
+      },
+      day4TaskList: function() {
+        var start = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 3)));
+        var end   = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 4)));
+        return this.taskList.filter(v => {
+          if(!v.task_end_date_optional) return false;
+          return start.getTime() >= v.task_end_date_optional.getTime() && end.getTime() < v.task_end_date_optional.getTime();
+        })
+      },
+      day5TaskList: function() {
+        var start = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 4)));
+        var end   = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 5)));
+        return this.taskList.filter(v => {
+          if(!v.task_end_date_optional) return false;
+          return start.getTime() >= v.task_end_date_optional.getTime() && end.getTime() < v.task_end_date_optional.getTime();
+        })
+      },
+      day6TaskList: function() {
+        var start = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 5)));
+        var end   = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 6)));
+        return this.taskList.filter(v => {
+          if(!v.task_end_date_optional) return false;
+          return start.getTime() >= v.task_end_date_optional.getTime() && end.getTime() < v.task_end_date_optional.getTime();
+        })
+      },
+      day7TaskList: function() {
+        var start = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 6)));
+        var end   = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 7)));
+        return this.taskList.filter(v => {
+          if(!v.task_end_date_optional) return false;
+          return start.getTime() >= v.task_end_date_optional.getTime() && end.getTime() < v.task_end_date_optional.getTime();
+        })
+      },
+      otherTaskList: function() {
+        var start = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 7)));
+        return this.taskList.filter(v => {
+          if(!v.task_end_date_optional) return false;
+          return start.getTime() >= v.task_end_date_optional.getTime();
+        })
+      },
+      backlogTaskList: function() {
+        return this.taskList.filter(v => !v.task_end_date_optional)
+      },
+    }
+    ,created: function() {
       console.log("created main");
-      this.$http.jsonp(`${urlbase}/task/list?token=${this.$data.auth.token}`).then(function (data, status, request) {
+
+
+      // this.$http.jsonp(`${urlbase}/task/list?token=${this.$data.auth.token}`).then(function (data, status, request) {
                 //GETメソッドが成功した場合の処理
-                console.log(data);
-            }, function (data, status, request) {
-                //GETメソッドが失敗した場合の処理
-                console.log(data);
-            })
+                // console.log(data.data.header.code);
+                // console.log(JSON.stringify(data.data.detail));
+                var taskList = serverResponseSample.map((v) => {
+                  if(v.task_end_date_optional) {
+                    v.task_end_date_optional = new Date(v.task_end_date_optional)
+                  }
+                  if(v.task_completed_date_optional) {
+                    v.task_completed_date_optional = new Date(v.task_completed_date_optional)
+                  }
+                  return v;
+                })
+                .filter((v) => {
+                  if(!v.task_completed_date_optional) {
+                    return true;
+                  }
+                  // 24時間以上過去は切る
+                  return Date.now() - 24 * 60 * 60 * 1000 - v.task_completed_date_optional.getTime() < 0;
+                })
+                .sort((a, b) => {// 下ならプラスを返す
+                  if(a.task_end_date_optional && !b.task_end_date_optional) {
+                    return -1;
+                  }
+                  if(!a.task_end_date_optional && b.task_end_date_optional) {
+                    return 1;
+                  }
+                  if(!a.task_end_date_optional && !b.task_end_date_optional) {
+                    if(a.task_id < b.task_id) return -1;
+                    if(a.task_id == b.task_id) return 0;
+                    if(a.task_id > b.task_id) return 1;
+                  }
+                  return a.task_end_date_optional.getTime() - b.task_end_date_optional.getTime();
+                });
+                model.taskList = taskList;
+      //       }, function (data, status, request) {
+      //           //GETメソッドが失敗した場合の処理
+      //           console.log(data);
+      // })
     }
 })
 
