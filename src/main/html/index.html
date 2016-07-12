@@ -15,7 +15,7 @@
 </template>
 
 <template id="tasklist-template">
-  <h3>今日 {{today}}</h3>
+  <h3>今日 {{today}} <input type="text" name="todays_new_task" v-model="todaysNewtaskName" /><button v-on:click="addTodaysNewTask">add</button></h3>
   <ul>
     <li v-for="task in todayTaskList" style="{{task.task_completed_date_optional ? 'text-decoration: line-through;' : ''}}">
       {{ task.task_name }} {{task.task_end_date_optional}}
@@ -91,7 +91,6 @@
 <script src="https://cdn.jsdelivr.net/vue.router/0.7.10/vue-router.min.js"></script>
 <script src="https://cdn.jsdelivr.net/vue.resource/0.9.3/vue-resource.min.js"></script>
 <script>
-var urlbase = 'http://localhost:4567/api/v1/jsonp'
 var serverResponseSample = [];
 var model = {
   auth: {
@@ -102,11 +101,12 @@ var model = {
       lastCheckDate: null
     }
   },
-  taskList: []
+  taskList: [],
+  todaysNewtaskName: ''
 }
 
 var formatDate = function(format, date) {
-  var year = date.getYear();
+  var year = date.getFullYear();
   var month = ("0" + (date.getMonth() + 1)).slice(-2);
   var dayofmonth = ("0" + date.getDate()).slice(-2);
   return format.split('YYYY').join(year).split('MM').join(month).split('DD').join(dayofmonth);
@@ -132,6 +132,29 @@ var First = Vue.extend({
 //     template: '#login-template'
 // })
 
+var TaskRepository = function() {
+  var urlbase = 'http://localhost:4567/api/v1/jsonp';
+  var getTaskList = function(vue, success, error) {
+    vue.$http.jsonp(`${urlbase}/task/list?token=${model.auth.token}`).then(
+      (data, status, request) => success(data.data, status),
+      () => error(data.data, status)
+    );
+  };
+
+  var addTask = function(vue, name, enddate, success, error) {
+    vue.$http.jsonp(`${urlbase}/task/add?token=${model.auth.token}&name=${name}&enddate=${enddate}`).then(
+      (data, status, request) => success(data.data, status),
+      (data, status, request) => error(data.data, status)
+    );
+  }
+  return {
+    getTaskList: getTaskList,
+    addTask: addTask
+  };
+};
+
+var taskRepository = TaskRepository();
+
 var day = (num) => new Date(Date.now() + 24 * 60 * 60 * 1000 * num);
 var formatedDay = (num) => formatDate('MM/DD', day(num));
 
@@ -145,6 +168,32 @@ var Main = Vue.extend({
         }
       }
     },
+    methods: {
+      addTodaysNewTask: function() {
+        this.todaysNewtaskName = this.todaysNewtaskName.trim();
+        if(this.todaysNewtaskName.length == 0) {
+          return;
+        }
+        taskRepository.addTask(
+          this,
+          this.todaysNewtaskName,
+          formatDate('YYYY-MM-DD', day(0)),
+          (data) => {
+            var v = data.detail[0]
+            if(v.task_end_date_optional) {
+              v.task_end_date_optional = new Date(v.task_end_date_optional)
+            }
+            if(v.task_completed_date_optional) {
+              v.task_completed_date_optional = new Date(v.task_completed_date_optional)
+            }
+            this.taskList.push(v);
+            console.log(v);
+          },
+          (data) => {}
+        );
+        console.log(this.todaysNewtaskName);
+      }
+    },
     computed: {
       today: () => formatedDay(0),
       day2: () => formatedDay(1),
@@ -156,64 +205,66 @@ var Main = Vue.extend({
       todayTaskList: function() {
         var nextDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
         var end = new Date(formatDate('YYYY-MM-DD 00:00:00', nextDay));
+        console.log(end);
         return this.taskList.filter(v => {
           if(!v.task_end_date_optional) return false;
-          return end.getTime() < v.task_end_date_optional.getTime();
+          console.log(end, v.task_end_date_optional, end.getTime(), v.task_end_date_optional.getTime());
+          return  v.task_end_date_optional.getTime() < end.getTime();
         })
       },
       day2TaskList: function() {
-        var start = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 1)));
-        var end   = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 2)));
+        var start = new Date(formatDate('YYYY-MM-DD 00:00:00', day(1)));
+        var end   = new Date(formatDate('YYYY-MM-DD 00:00:00', day(2)));
         return this.taskList.filter(v => {
           if(!v.task_end_date_optional) return false;
-          return start.getTime() >= v.task_end_date_optional.getTime() && end.getTime() < v.task_end_date_optional.getTime();
+          return start.getTime() <= v.task_end_date_optional.getTime() && v.task_end_date_optional.getTime() < end.getTime();
         })
       },
       day3TaskList: function() {
-        var start = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 2)));
-        var end   = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 3)));
+        var start = new Date(formatDate('YYYY-MM-DD 00:00:00', day(2)));
+        var end   = new Date(formatDate('YYYY-MM-DD 00:00:00', day(3)));
         return this.taskList.filter(v => {
           if(!v.task_end_date_optional) return false;
-          return start.getTime() >= v.task_end_date_optional.getTime() && end.getTime() < v.task_end_date_optional.getTime();
+          return start.getTime() <= v.task_end_date_optional.getTime() && v.task_end_date_optional.getTime() < end.getTime();
         })
       },
       day4TaskList: function() {
-        var start = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 3)));
-        var end   = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 4)));
+        var start = new Date(formatDate('YYYY-MM-DD 00:00:00', day(3)));
+        var end   = new Date(formatDate('YYYY-MM-DD 00:00:00', day(4)));
         return this.taskList.filter(v => {
           if(!v.task_end_date_optional) return false;
-          return start.getTime() >= v.task_end_date_optional.getTime() && end.getTime() < v.task_end_date_optional.getTime();
+          return start.getTime() <= v.task_end_date_optional.getTime() && v.task_end_date_optional.getTime() < end.getTime();
         })
       },
       day5TaskList: function() {
-        var start = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 4)));
-        var end   = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 5)));
+        var start = new Date(formatDate('YYYY-MM-DD 00:00:00', day(4)));
+        var end   = new Date(formatDate('YYYY-MM-DD 00:00:00', day(5)));
         return this.taskList.filter(v => {
           if(!v.task_end_date_optional) return false;
-          return start.getTime() >= v.task_end_date_optional.getTime() && end.getTime() < v.task_end_date_optional.getTime();
+          return start.getTime() <= v.task_end_date_optional.getTime() && v.task_end_date_optional.getTime() < end.getTime();
         })
       },
       day6TaskList: function() {
-        var start = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 5)));
-        var end   = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 6)));
+        var start = new Date(formatDate('YYYY-MM-DD 00:00:00', day(5)));
+        var end   = new Date(formatDate('YYYY-MM-DD 00:00:00', day(6)));
         return this.taskList.filter(v => {
           if(!v.task_end_date_optional) return false;
-          return start.getTime() >= v.task_end_date_optional.getTime() && end.getTime() < v.task_end_date_optional.getTime();
+          return start.getTime() <= v.task_end_date_optional.getTime() && v.task_end_date_optional.getTime() < end.getTime();
         })
       },
       day7TaskList: function() {
-        var start = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 6)));
-        var end   = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 7)));
+        var start = new Date(formatDate('YYYY-MM-DD 00:00:00', day(6)));
+        var end   = new Date(formatDate('YYYY-MM-DD 00:00:00', day(7)));
         return this.taskList.filter(v => {
           if(!v.task_end_date_optional) return false;
-          return start.getTime() >= v.task_end_date_optional.getTime() && end.getTime() < v.task_end_date_optional.getTime();
+          return start.getTime() <= v.task_end_date_optional.getTime() && v.task_end_date_optional.getTime() < end.getTime();
         })
       },
       otherTaskList: function() {
-        var start = new Date(formatDate('YYYY-MM-DD 00:00:00', new Date(Date.now() + 24 * 60 * 60 * 1000 * 7)));
+        var start = new Date(formatDate('YYYY-MM-DD 00:00:00', day(7)));
         return this.taskList.filter(v => {
           if(!v.task_end_date_optional) return false;
-          return start.getTime() >= v.task_end_date_optional.getTime();
+          return start.getTime() <= v.task_end_date_optional.getTime();
         })
       },
       backlogTaskList: function() {
@@ -223,12 +274,11 @@ var Main = Vue.extend({
     ,created: function() {
       console.log("created main");
 
-
-      // this.$http.jsonp(`${urlbase}/task/list?token=${this.$data.auth.token}`).then(function (data, status, request) {
+      taskRepository.getTaskList(this, function (data, status, request) {
                 //GETメソッドが成功した場合の処理
                 // console.log(data.data.header.code);
-                // console.log(JSON.stringify(data.data.detail));
-                var taskList = serverResponseSample.map((v) => {
+                console.log(JSON.stringify(data.detail));
+                var taskList = data.detail.map((v) => {
                   if(v.task_end_date_optional) {
                     v.task_end_date_optional = new Date(v.task_end_date_optional)
                   }
@@ -259,10 +309,10 @@ var Main = Vue.extend({
                   return a.task_end_date_optional.getTime() - b.task_end_date_optional.getTime();
                 });
                 model.taskList = taskList;
-      //       }, function (data, status, request) {
-      //           //GETメソッドが失敗した場合の処理
-      //           console.log(data);
-      // })
+            }, function (data, status, request) {
+                //GETメソッドが失敗した場合の処理
+                console.log(data);
+      })
     }
 })
 
