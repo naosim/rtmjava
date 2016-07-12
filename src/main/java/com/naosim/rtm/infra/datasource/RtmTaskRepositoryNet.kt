@@ -109,7 +109,8 @@ class RtmTaskRepositoryNet(val rtmApiConfig: RtmApiConfig): RtmTaskRepository {
                         TaskAddedDateTime(rtmRequestUtil.createLocalDateTime(taskElement.getAttribute("added"))),
                         Optional.ofNullable(taskElement.getAttribute("completed")).filter { it.isNotEmpty() }.map { rtmRequestUtil.createLocalDateTime(it) }.map { TaskCompletedDateTime(it) },
                         Optional.ofNullable(taskElement.getAttribute("deleted")).filter { it.isNotEmpty() }.map { rtmRequestUtil.createLocalDateTime(it) }.map { TaskDeletedDateTime(it) },
-                        Optional.ofNullable(taskElement.getAttribute("start")).filter { it.isNotEmpty() }.map { rtmRequestUtil.createLocalDateTime(it) }.map { TaskStartDateTime(it) }
+                        Optional.ofNullable(taskElement.getAttribute("start")).filter { it.isNotEmpty() }.map { rtmRequestUtil.createLocalDateTime(it) }.map { TaskStartDateTime(it) },
+                        Optional.ofNullable(taskElement.getAttribute("due")).filter { it.isNotEmpty() }.map { rtmRequestUtil.createLocalDateTime(it) }.map { TaskDueDateTime(it) }
                 ),
                 TaskPostponed(taskElement.getAttribute("postponed")),
                 TaskEstimate(taskElement.getAttribute("estimate"))

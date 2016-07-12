@@ -26,7 +26,7 @@ class タスクRepositoryWithRTM(val token: Token, val rtmRepository: RtmReposit
 
     fun convertTaskSeriesEntityToタスクEntity(taskSeriesEntity: TaskSeriesEntity): タスクEntityWithRTM {
         val タスクID = タスクIDConverter.createタスクID(taskSeriesEntity.taskIdSet)
-        val タスク消化予定日Optional = taskSeriesEntity.taskEntity.taskDateTimes.taskStartDateTime
+        val タスク消化予定日Optional = taskSeriesEntity.taskEntity.taskDateTimes.taskDueDateTime
                 .map { タスク消化予定日(it.dateTime.toLocalDate()) as タスク消化予定日Optional }
                 .orElse(タスク消化予定日NotExist())
         val タスク完了日Optional = taskSeriesEntity.taskEntity.taskDateTimes.taskCompletedDateTime

@@ -26,7 +26,8 @@ class TaskDateTimes(
         val taskAddedDateTime: TaskAddedDateTime,
         val taskCompletedDateTime: Optional<TaskCompletedDateTime>,
         val taskDeletedDateTime: Optional<TaskDeletedDateTime>,
-        val taskStartDateTime: Optional<TaskStartDateTime>
+        val taskStartDateTime: Optional<TaskStartDateTime>,
+        val taskDueDateTime: Optional<TaskDueDateTime>
 ) {};
 
 class TaskAddedDateTime(val dateTime: LocalDateTime) {};
