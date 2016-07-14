@@ -17,6 +17,13 @@ body {
 input[type=text].form-control {
   width: 540px;
 }
+.task-edit-buttons {
+  display: inline-block;
+  visibility: hidden;
+}
+.task:hover .task-edit-buttons {
+  visibility: visible;
+}
 </style>
 
 <div id="app">
@@ -37,8 +44,8 @@ input[type=text].form-control {
 <template id="tasklist-template">
   <h3>今日 {{today}} <input class="form-control" type="text" v-model="newTaskNameOfDay[1]" /><button class="btn btn-success" v-on:click="addTodaysNewTask(1)">add</button></h3>
   <ul>
-    <li v-for="task in taskListOfDay(1)">
-      <div class="task-name" style="{{task.task_completed_date_optional ? 'text-decoration: line-through;' : ''}}">{{ task.task_name }} <span class="task-end-date">{{formatEndDate(task.task_end_date_optional)}}</span></div><button class="btn btn-success" v-on:click="done(task)">DONE</button>
+    <li class="task" v-for="task in taskListOfDay(1)">
+      <div class="task-name" style="{{task.task_completed_date_optional ? 'text-decoration: line-through;' : ''}}">{{ task.task_name }} <span class="task-end-date">{{formatEndDate(task.task_end_date_optional)}}</span></div><div class="task-edit-buttons"><button class="btn btn-success" v-on:click="done(task)">DONE</button></div>
     </li>
   </ul>
 
