@@ -19,6 +19,7 @@ import com.naosim.someapp.infra.api.auth.getauthurl.AuthGetAuthUrlApi;
 import com.naosim.someapp.infra.api.auth.gettoken.AuthGetTokenApi;
 import com.naosim.someapp.infra.api.task.add.TaskAddApi;
 import com.naosim.someapp.infra.api.lib.Api;
+import com.naosim.someapp.infra.api.task.complete.TaskCompleteApi;
 import com.naosim.someapp.infra.api.task.list.TaskListApi;
 import com.naosim.someapp.infra.datasource.AuthRepository;
 import com.naosim.someapp.infra.datasource.タスクRepositoryWithRTM;
@@ -42,9 +43,12 @@ public class Main {
                 new HelloApi(),
                 new TaskAddApi(repositoryFactory),
                 new TaskListApi(repositoryFactory),
+                new TaskCompleteApi(repositoryFactory),
+                
                 new AuthCheckTokenApi(repositoryFactory),
                 new AuthGetAuthUrlApi(repositoryFactory),
-                new AuthGetTokenApi(repositoryFactory)
+                new AuthGetTokenApi(repositoryFactory),
+
         };
         Stream.of(apiList).forEach(api -> get("/api/v1/json" + api.getPath(), api::router, gson::toJson));
         Stream.of(apiList).forEach(api -> get("/api/v1/jsonp" + api.getPath(), (req, res) -> {

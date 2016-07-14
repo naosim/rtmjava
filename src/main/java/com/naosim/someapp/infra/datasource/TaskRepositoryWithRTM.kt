@@ -3,6 +3,7 @@ package com.naosim.someapp.infra.datasource
 import com.naosim.rtm.domain.model.Filter
 import com.naosim.rtm.domain.model.auth.Token
 import com.naosim.rtm.domain.model.task.*
+import com.naosim.rtm.domain.model.timeline.TransactionalResponse
 import com.naosim.rtm.domain.repository.RtmRepository
 import com.naosim.someapp.domain.*
 
@@ -49,6 +50,12 @@ class タスクRepositoryWithRTM(val token: Token, val rtmRepository: RtmReposit
                 .map { convertTaskSeriesEntityToタスクEntity(it) }
 //                .sorted()
         return タスクEntityList
+    }
+
+    override fun 完了(タスクID: タスクID): タスクEntity {
+        val timelineId = rtmRepository.createTimeline(token)
+        val result = rtmRepository.completeTask(token, timelineId, タスクIDConverter.createTaskIdSet(タスクID)).response
+        return convertTaskSeriesEntityToタスクEntity(result);
     }
 }
 

@@ -46,6 +46,7 @@ interface タスク更新Repository {
 interface タスクRepository {
     fun 追加(タスク名: タスク名, タスク消化予定日Optional: タスク消化予定日Optional): タスクEntity;
     fun すべてのタスク取得(): List<タスクEntity>
+    fun 完了(タスクID: タスクID): タスクEntity
 }
 
 

@@ -89,7 +89,7 @@
   <h3>BACKLOG</h3>
   <ul>
     <li v-for="task in backlogTaskList" style="{{task.task_completed_date_optional ? 'text-decoration: line-through;' : ''}}">
-      {{ task.task_name }} <span class="task-end-date">{{formatEndDate(task.task_end_date_optional)}}</span>
+      {{ task.task_name }} <span class="task-end-date">{{formatEndDate(task.task_end_date_optional)}}</span> <button v-on:click="done(task)">DONE</button>
     </li>
   </ul>
 </template>
@@ -141,6 +141,15 @@ var First = Vue.extend({
 
 var taskRepository = TaskRepository();
 
+var convertStringDateToDate = (v) => {
+  if(v.task_end_date_optional) {
+    v.task_end_date_optional = new Date(v.task_end_date_optional)
+  }
+  if(v.task_completed_date_optional) {
+    v.task_completed_date_optional = new Date(v.task_completed_date_optional)
+  }
+  return v;
+};
 
 var Main = Vue.extend({
     template: '#tasklist-template',
@@ -186,7 +195,7 @@ var Main = Vue.extend({
       taskListOfDay: function(targetDay) {
         var start = new Date(formatDate('YYYY-MM-DD 00:00:00', day(targetDay - 1)));
         var end   = new Date(formatDate('YYYY-MM-DD 00:00:00', day(targetDay)));
-        return this.taskList.filter(v => {
+        return this.sortedTaskList().filter(v => {
           if(!v.task_end_date_optional) {
             return false;
           }
@@ -199,9 +208,9 @@ var Main = Vue.extend({
       formatEndDate: function(endDate) {
         return formatDate('MM-DD', endDate);
       },
-      done: function(task) {
-        console.log(task.task_id);
+      pushOrUpdateTaskToModel: function(task) {
         var isFind = false;
+        // 同じIDのタスクを探す
         for(var i = 0; i < this.taskList.length; i++) {
           if(this.taskList[i].task_id == task.task_id) {
             isFind = true;
@@ -209,19 +218,58 @@ var Main = Vue.extend({
           }
         }
         if(isFind) {
-          console.log(isFind);
-          task.task_completed_date_optional = new Date();// とりあえず
-          console.log(JSON.parse(JSON.stringify(task)));
           model.taskList.splice(i, 1, {
             task_name: task.task_name,
             task_id: task.task_id,
             task_end_date_optional: task.task_end_date_optional,
-            task_completed_date_optional: new Date()
-          })
+            task_completed_date_optional: task.task_completed_date_optional
+          });
+        } else {
+          model.taskList.push(task);
         }
-        // this.taskList.filter(v => v.task_id == task.task_id)[0].task_completed_date_optional = new Date();
-        // task.task_completed_date_optional = new Date();// とりあえず
-      }
+      },
+      done: function(task) {
+        var self = this;
+        task.task_completed_date_optional = new Date();// とりあえず
+        this.pushOrUpdateTaskToModel(task)
+        taskRepository.complete(
+          this, this.auth.token, task.task_id,
+          (data, status, request) => {
+            console.log(data.detail);
+            var updatedTask = data.detail.map(convertStringDateToDate)[0];
+            this.pushOrUpdateTaskToModel(updatedTask);
+          },
+          function (data, status, request) {
+            //GETメソッドが失敗した場合の処理
+            console.log(data);
+            alert(JSON.stringify(data, null, '  '))
+        })
+      },
+      sortedTaskList: function() {
+        var sortTask = (a, b) => {// 下ならプラスを返す
+          if(a.task_end_date_optional && !b.task_end_date_optional) {
+            return -1;
+          }
+          if(!a.task_end_date_optional && b.task_end_date_optional) {
+            return 1;
+          }
+          if(!a.task_end_date_optional && !b.task_end_date_optional) {
+            if(a.task_id < b.task_id) return -1;
+            if(a.task_id == b.task_id) return 0;
+            if(a.task_id > b.task_id) return 1;
+          }
+          return a.task_end_date_optional.getTime() - b.task_end_date_optional.getTime();
+        };
+
+        return this.taskList.filter((v) => {
+          if(!v.task_completed_date_optional) {
+            return true;
+          }
+          // 24時間以上過去は切る
+          return Date.now() - 24 * 60 * 60 * 1000 - v.task_completed_date_optional.getTime() < 0;
+        })
+        .sort(sortTask);
+      },
     },
     computed: {
       today: () => formatedDay(0),
@@ -233,7 +281,7 @@ var Main = Vue.extend({
       day7: () => formatedDay(6),
       otherTaskList: function() {
         var start = new Date(formatDate('YYYY-MM-DD 00:00:00', day(7)));
-        return this.taskList.filter(v => {
+        return this.sortedTaskList().filter(v => {
           if(!v.task_end_date_optional) return false;
           return start.getTime() <= v.task_end_date_optional.getTime();
         })
@@ -241,53 +289,18 @@ var Main = Vue.extend({
       backlogTaskList: function() {
         return this.taskList.filter(v => !v.task_end_date_optional)
       },
-    }
-    ,created: function() {
+    },
+    created: function() {
       console.log("created main");
 
-      taskRepository.getTaskList(this, this.auth.token, function (data, status, request) {
-                //GETメソッドが成功した場合の処理
-                // console.log(data.data.header.code);
-                console.log(JSON.stringify(data.detail));
-
-                var convertStringDateToDate = (v) => {
-                  if(v.task_end_date_optional) {
-                    v.task_end_date_optional = new Date(v.task_end_date_optional)
-                  }
-                  if(v.task_completed_date_optional) {
-                    v.task_completed_date_optional = new Date(v.task_completed_date_optional)
-                  }
-                  return v;
-                };
-
-                var sortTask = (a, b) => {// 下ならプラスを返す
-                  if(a.task_end_date_optional && !b.task_end_date_optional) {
-                    return -1;
-                  }
-                  if(!a.task_end_date_optional && b.task_end_date_optional) {
-                    return 1;
-                  }
-                  if(!a.task_end_date_optional && !b.task_end_date_optional) {
-                    if(a.task_id < b.task_id) return -1;
-                    if(a.task_id == b.task_id) return 0;
-                    if(a.task_id > b.task_id) return 1;
-                  }
-                  return a.task_end_date_optional.getTime() - b.task_end_date_optional.getTime();
-                };
-
-                var taskList = data.detail.map(convertStringDateToDate)
-                .filter((v) => {
-                  if(!v.task_completed_date_optional) {
-                    return true;
-                  }
-                  // 24時間以上過去は切る
-                  return Date.now() - 24 * 60 * 60 * 1000 - v.task_completed_date_optional.getTime() < 0;
-                })
-                .sort(sortTask);
-                model.taskList = taskList;
-            }, function (data, status, request) {
-                //GETメソッドが失敗した場合の処理
-                console.log(data);
+      taskRepository.getTaskList(this, this.auth.token,
+        function (data, status, request) {
+          console.log(data.detail);
+          model.taskList = data.detail.map(convertStringDateToDate);
+        },
+        function (data, status, request) {
+          //GETメソッドが失敗した場合の処理
+          console.log(data);
       })
     }
 })
