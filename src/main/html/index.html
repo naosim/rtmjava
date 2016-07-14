@@ -1,8 +1,21 @@
 <!DOCTYPE html>
+<link href="css/skyblue.min.css" rel='stylesheet' type='text/css'>
 <style>
+body {
+  padding: 24px;
+}
 .task-end-date {
   color: #aaa;
   font-size: 8pt;
+}
+
+.task-name {
+  display: inline-block;
+  width: 540px;
+}
+
+input[type=text].form-control {
+  width: 540px;
 }
 </style>
 
@@ -22,15 +35,15 @@
 </template>
 
 <template id="tasklist-template">
-  <h3>今日 {{today}} <input type="text" v-model="newTaskNameOfDay[1]" /><button v-on:click="addTodaysNewTask(1)">add</button></h3>
+  <h3>今日 {{today}} <input class="form-control" type="text" v-model="newTaskNameOfDay[1]" /><button class="btn btn-success" v-on:click="addTodaysNewTask(1)">add</button></h3>
   <ul>
-    <li v-for="task in taskListOfDay(1)" style="{{task.task_completed_date_optional ? 'text-decoration: line-through;' : ''}}">
-      {{ task.task_name }} <span class="task-end-date">{{formatEndDate(task.task_end_date_optional)}}</span> <button v-on:click="done(task)">DONE</button>
+    <li v-for="task in taskListOfDay(1)">
+      <div class="task-name" style="{{task.task_completed_date_optional ? 'text-decoration: line-through;' : ''}}">{{ task.task_name }} <span class="task-end-date">{{formatEndDate(task.task_end_date_optional)}}</span></div><button class="btn btn-success" v-on:click="done(task)">DONE</button>
     </li>
   </ul>
 
   <hr>
-  <h3>明日 {{day2}} <input type="text" v-model="newTaskNameOfDay[2]" /><button v-on:click="addTodaysNewTask(2)">add</button></h3>
+  <h3>明日 {{day2}} <input class="form-control" type="text" v-model="newTaskNameOfDay[2]" /><button class="btn btn-success" v-on:click="addTodaysNewTask(2)">add</button></h3>
   <ul>
     <li v-for="task in taskListOfDay(2)" style="{{task.task_completed_date_optional ? 'text-decoration: line-through;' : ''}}">
       {{ task.task_name }} <span class="task-end-date">{{formatEndDate(task.task_end_date_optional)}}</span>
@@ -38,7 +51,7 @@
   </ul>
 
   <hr>
-  <h3>明後日 {{day3}} <input type="text" v-model="newTaskNameOfDay[3]" /><button v-on:click="addTodaysNewTask(3)">add</button></h3>
+  <h3>明後日 {{day3}} <input class="form-control" type="text" v-model="newTaskNameOfDay[3]" /><button class="btn btn-success" v-on:click="addTodaysNewTask(3)">add</button></h3>
   <ul>
     <li v-for="task in taskListOfDay(3)" style="{{task.task_completed_date_optional ? 'text-decoration: line-through;' : ''}}">
       {{ task.task_name }} <span class="task-end-date">{{formatEndDate(task.task_end_date_optional)}}</span>
@@ -46,7 +59,7 @@
   </ul>
 
   <hr>
-  <h3>3日後 {{day4}} <input type="text" v-model="newTaskNameOfDay[4]" /><button v-on:click="addTodaysNewTask(4)">add</button></h3>
+  <h3>3日後 {{day4}} <input class="form-control" type="text" v-model="newTaskNameOfDay[4]" /><button class="btn btn-success" v-on:click="addTodaysNewTask(4)">add</button></h3>
   <ul>
     <li v-for="task in taskListOfDay(4)" style="{{task.task_completed_date_optional ? 'text-decoration: line-through;' : ''}}">
       {{ task.task_name }} <span class="task-end-date">{{formatEndDate(task.task_end_date_optional)}}</span>
@@ -54,7 +67,7 @@
   </ul>
 
   <hr>
-  <h3>4日後 {{day5}} <input type="text" v-model="newTaskNameOfDay[5]" /><button v-on:click="addTodaysNewTask(5)">add</button></h3>
+  <h3>4日後 {{day5}} <input class="form-control" type="text" v-model="newTaskNameOfDay[5]" /><button class="btn btn-success" v-on:click="addTodaysNewTask(5)">add</button></h3>
   <ul>
     <li v-for="task in taskListOfDay(5)" style="{{task.task_completed_date_optional ? 'text-decoration: line-through;' : ''}}">
       {{ task.task_name }} <span class="task-end-date">{{formatEndDate(task.task_end_date_optional)}}</span>
@@ -62,7 +75,7 @@
   </ul>
 
   <hr>
-  <h3>5日後 {{day6}} <input type="text" v-model="newTaskNameOfDay[6]" /><button v-on:click="addTodaysNewTask(6)">add</button></h3>
+  <h3>5日後 {{day6}} <input class="form-control" type="text" v-model="newTaskNameOfDay[6]" /><button class="btn btn-success" v-on:click="addTodaysNewTask(6)">add</button></h3>
   <ul>
     <li v-for="task in taskListOfDay(6)" style="{{task.task_completed_date_optional ? 'text-decoration: line-through;' : ''}}">
       {{ task.task_name }} <span class="task-end-date">{{formatEndDate(task.task_end_date_optional)}}</span>
@@ -70,7 +83,7 @@
   </ul>
 
   <hr>
-  <h3>6日後 {{day7}} <input type="text" v-model="newTaskNameOfDay[7]" /><button v-on:click="addTodaysNewTask(7)">add</button></h3>
+  <h3>6日後 {{day7}} <input class="form-control" type="text" v-model="newTaskNameOfDay[7]" /><button class="btn btn-success" v-on:click="addTodaysNewTask(7)">add</button></h3>
   <ul>
     <li v-for="task in taskListOfDay(7)" style="{{task.task_completed_date_optional ? 'text-decoration: line-through;' : ''}}">
       {{ task.task_name }} <span class="task-end-date">{{formatEndDate(task.task_end_date_optional)}}</span>
@@ -89,7 +102,7 @@
   <h3>BACKLOG</h3>
   <ul>
     <li v-for="task in backlogTaskList" style="{{task.task_completed_date_optional ? 'text-decoration: line-through;' : ''}}">
-      {{ task.task_name }} <span class="task-end-date">{{formatEndDate(task.task_end_date_optional)}}</span> <button v-on:click="done(task)">DONE</button>
+      {{ task.task_name }} <span class="task-end-date">{{formatEndDate(task.task_end_date_optional)}}</span> <button class="btn btn-success" v-on:click="done(task)">DONE</button>
     </li>
   </ul>
 </template>
@@ -162,7 +175,7 @@ var Main = Vue.extend({
       }
     },
     methods: {
-      addNewTaskCommon: function(taskName, formatedEndDate) {
+      addNewTaskCommon: function(taskName, formatedEndDate, success) {
         if(taskName.length == 0) {
           return;
         }
@@ -181,6 +194,7 @@ var Main = Vue.extend({
             }
             this.taskList.push(v);
             console.log(v);
+            success();
           },
           (data) => {}
         );
@@ -190,7 +204,7 @@ var Main = Vue.extend({
         if(this.newTaskNameOfDay[targetDay].length == 0) {
           return;
         }
-        this.addNewTaskCommon(this.newTaskNameOfDay[targetDay], formatDate('YYYY-MM-DD', day(targetDay - 1)));
+        this.addNewTaskCommon(this.newTaskNameOfDay[targetDay], formatDate('YYYY-MM-DD', day(targetDay - 1)), () => this.newTaskNameOfDay.splice(targetDay, 1, ''));
       },
       taskListOfDay: function(targetDay) {
         var start = new Date(formatDate('YYYY-MM-DD 00:00:00', day(targetDay - 1)));
@@ -242,7 +256,7 @@ var Main = Vue.extend({
           function (data, status, request) {
             //GETメソッドが失敗した場合の処理
             console.log(data);
-            alert(JSON.stringify(data, null, '  '))
+            // alert(JSON.stringify(data, null, '  '))
         })
       },
       sortedTaskList: function() {
