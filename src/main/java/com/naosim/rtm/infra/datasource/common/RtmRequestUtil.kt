@@ -60,7 +60,8 @@ class RtmRequestUtil(val config: RtmApiConfig) {
     }
 
     fun createLocalDateTime(datetime: String): LocalDateTime {
-        return LocalDateTime.parse(datetime, DateTimeFormatter.ISO_DATE_TIME)
+        val result = LocalDateTime.parse(datetime, DateTimeFormatter.ISO_DATE_TIME).plusHours(9)// japan
+        return result
     }
 
 
