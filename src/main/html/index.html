@@ -332,13 +332,19 @@ var Main = Vue.extend({
     },
     created: function() {
       console.log("created main");
-
+      var nowYYYYMMDD = formatDate('YYYY-MM-DD',new Date());
       taskRepository.getTaskList(this, this.auth.token,
         function (data, status, request) {
           console.log(data.detail);
           model.taskList = data.detail
+            .map(convertStringDateToDate)
             .filter(v => !v.task_deleted_date_optional)
-            .map(convertStringDateToDate);
+            .filter(v => {
+              if(!v.task_completed_date_optional) {
+                return true;
+              }
+              return formatDate('YYYY-MM-DD', v.task_completed_date_optional) == nowYYYYMMDD
+            });
         },
         function (data, status, request) {
           //GETメソッドが失敗した場合の処理
