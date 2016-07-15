@@ -17,6 +17,10 @@ class タスクEntityImpl(
 
 
 class タスクRepositoryOnMemory: タスクRepository {
+    override fun 完了(タスクID: タスクID): タスクEntity {
+        throw UnsupportedOperationException()
+    }
+
     val map = HashMap<String, タスクEntity>();
     override fun 追加(タスク名: タスク名, タスク消化予定日Optional: タスク消化予定日Optional): タスクEntity {
         val タスクID = タスクID("TID" + LocalDateTime.now().toString());

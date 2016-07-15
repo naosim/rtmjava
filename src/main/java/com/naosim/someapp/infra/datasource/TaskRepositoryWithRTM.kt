@@ -3,6 +3,7 @@ package com.naosim.someapp.infra.datasource
 import com.naosim.rtm.domain.model.Filter
 import com.naosim.rtm.domain.model.auth.Token
 import com.naosim.rtm.domain.model.task.*
+import com.naosim.rtm.domain.model.timeline.TransactionalResponse
 import com.naosim.rtm.domain.repository.RtmRepository
 import com.naosim.someapp.domain.*
 
@@ -11,9 +12,9 @@ class タスクRepositoryWithRTM(val token: Token, val rtmRepository: RtmReposit
     val タスクIDConverter = タスクIDConverter()
     override fun 追加(タスク名: タスク名, タスク消化予定日Optional: タスク消化予定日Optional): タスクEntity {
         val timeline = rtmRepository.createTimeline(token)
-        val taskStartDateTimeOptional = タスク消化予定日Optional.get().map{ TaskStartDateTime(it.localDate.atStartOfDay()) }
+        val taskDueDateTimeOptional = タスク消化予定日Optional.get().map{ TaskDueDateTime(it.localDate.atStartOfDay()) }
         val taskIdSet = rtmRepository.addTask(token, timeline, TaskSeriesName(タスク名.value)).response.taskIdSet
-        rtmRepository.updateStartDateTime(token, timeline, taskIdSet, taskStartDateTimeOptional)
+        rtmRepository.updateDueDateTime(token, timeline, taskIdSet, taskDueDateTimeOptional)
         val タスクID = タスクIDConverter.createタスクID(taskIdSet)
         return タスクEntityWithRTM(
                 タスクID,
@@ -26,7 +27,7 @@ class タスクRepositoryWithRTM(val token: Token, val rtmRepository: RtmReposit
 
     fun convertTaskSeriesEntityToタスクEntity(taskSeriesEntity: TaskSeriesEntity): タスクEntityWithRTM {
         val タスクID = タスクIDConverter.createタスクID(taskSeriesEntity.taskIdSet)
-        val タスク消化予定日Optional = taskSeriesEntity.taskEntity.taskDateTimes.taskStartDateTime
+        val タスク消化予定日Optional = taskSeriesEntity.taskEntity.taskDateTimes.taskDueDateTime
                 .map { タスク消化予定日(it.dateTime.toLocalDate()) as タスク消化予定日Optional }
                 .orElse(タスク消化予定日NotExist())
         val タスク完了日Optional = taskSeriesEntity.taskEntity.taskDateTimes.taskCompletedDateTime
@@ -47,7 +48,14 @@ class タスクRepositoryWithRTM(val token: Token, val rtmRepository: RtmReposit
                 .map { it.taskSeriesEntityList }
                 .reduce { a, b -> a.plus(b) }
                 .map { convertTaskSeriesEntityToタスクEntity(it) }
+//                .sorted()
         return タスクEntityList
+    }
+
+    override fun 完了(タスクID: タスクID): タスクEntity {
+        val timelineId = rtmRepository.createTimeline(token)
+        val result = rtmRepository.completeTask(token, timelineId, タスクIDConverter.createTaskIdSet(タスクID)).response
+        return convertTaskSeriesEntityToタスクEntity(result);
     }
 }
 

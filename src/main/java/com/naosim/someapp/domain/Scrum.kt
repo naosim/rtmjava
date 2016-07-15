@@ -25,9 +25,16 @@ interface タスク {
     }
 }
 
-interface タスクEntity : タスク {
+interface タスクEntity : タスク, Comparable<タスクEntity> {
     val タスクID: タスクID
     val タスク更新: タスク更新Repository
+    override fun compareTo(other: タスクEntity): Int {
+        var result = タスク消化予定日Optional.compareTo(other.タスク消化予定日Optional)
+        if(result != 0) {
+            return result
+        }
+        return タスクID.value.compareTo(other.タスクID.value)
+    }
 }
 
 interface タスク更新Repository {
@@ -39,6 +46,7 @@ interface タスク更新Repository {
 interface タスクRepository {
     fun 追加(タスク名: タスク名, タスク消化予定日Optional: タスク消化予定日Optional): タスクEntity;
     fun すべてのタスク取得(): List<タスクEntity>
+    fun 完了(タスクID: タスクID): タスクEntity
 }
 
 
@@ -46,9 +54,22 @@ interface タスクRepository {
 open class タスクID(val value: String)
 class タスク名(val value: String)
 
-interface タスク消化予定日Optional : IsExist<タスク消化予定日Optional, タスク消化予定日> {
+interface タスク消化予定日Optional : IsExist<タスク消化予定日Optional, タスク消化予定日>, Comparable<タスク消化予定日Optional> {
     fun isBefore(localDateTime: LocalDateTime): Boolean {
         return compareIfExist({ it.localDate.atStartOfDay().isBefore(localDateTime)})
+    }
+
+    override fun compareTo(other: タスク消化予定日Optional): Int {
+        if(isNotExist() && other.isNotExist()) {
+            return 0
+        }
+        if(isExist && other.isNotExist()) {
+            return -1
+        }
+        if(isNotExist() && isExist) {
+            return 1
+        }
+        return get().get().localDate.compareTo(other.get().get().localDate)
     }
 }
 
@@ -77,9 +98,10 @@ class タスク完了日NotExist : タスク完了日Optional {
     override val isExist: Boolean = false
 }
 
-enum class タスク状態 {
+enum class タスク状態: Comparable<タスク状態> {
     BACKLOG,//開始日が無い
     TODO,// 開始前
     DOING,// 開始予定日後、完了前
     DONE// 完了
+    ;
 }

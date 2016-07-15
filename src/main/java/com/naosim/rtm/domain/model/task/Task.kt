@@ -26,13 +26,17 @@ class TaskDateTimes(
         val taskAddedDateTime: TaskAddedDateTime,
         val taskCompletedDateTime: Optional<TaskCompletedDateTime>,
         val taskDeletedDateTime: Optional<TaskDeletedDateTime>,
-        val taskStartDateTime: Optional<TaskStartDateTime>
+        val taskStartDateTime: Optional<TaskStartDateTime>,
+        val taskDueDateTime: Optional<TaskDueDateTime>
 ) {};
 
 class TaskAddedDateTime(val dateTime: LocalDateTime) {};
 class TaskCompletedDateTime(val dateTime: LocalDateTime) {};
 class TaskDeletedDateTime(val dateTime: LocalDateTime) {};
 class TaskStartDateTime(val dateTime: LocalDateTime): RtmParamValueObject {
+    override val rtmParamValue: String = dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+};
+class TaskDueDateTime(val dateTime: LocalDateTime): RtmParamValueObject {
     override val rtmParamValue: String = dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
 };
 

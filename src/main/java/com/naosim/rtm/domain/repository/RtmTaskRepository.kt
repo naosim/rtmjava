@@ -12,4 +12,6 @@ interface RtmTaskRepository {
     fun addTask(token: Token, timelineId: TimelineId, name: TaskSeriesName/*, parse: Optional<Parse> うまく動作しない */): TransactionalResponse<TaskSeriesEntity>
     fun completeTask(token: Token, timelineId: TimelineId, taskIdSet: TaskIdSet): TransactionalResponse<TaskSeriesEntity>
     fun updateStartDateTime(token: Token, timelineId: TimelineId, taskIdSet: TaskIdSet, startDateTime: Optional<TaskStartDateTime>): TransactionalResponse<TaskSeriesEntity>
+    fun updateDueDateTime(token: Token, timelineId: TimelineId, taskIdSet: TaskIdSet, dueDateTime: Optional<TaskDueDateTime>): TransactionalResponse<TaskSeriesEntity>
+
 }
