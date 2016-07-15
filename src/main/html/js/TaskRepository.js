@@ -23,11 +23,20 @@ var TaskRepository = function() {
     );
   }
 
+  var deleteTask = function(vue, token, taskId, success, error) {
+    console.log(taskId);
+    vue.$http.jsonp(`${urlbase}/task/delete?token=${token}&task_id=${taskId}`).then(
+      (data, status, request) => success(data.data, status),
+      (data, status, request) => error(data, status)
+    );
+  }
+
 
 
   return {
     getTaskList: getTaskList,
     addTask: addTask,
     complete: complete,
+    deleteTask: deleteTask,
   };
 };

@@ -9,6 +9,7 @@ enum class RtmMethod(override val rtmParamValue: String) : RtmParamValueObject {
     tasks_getlist("rtm.tasks.getList"),
     tasks_add("rtm.tasks.add"),
     tasks_complete("rtm.tasks.complete"),
+    tasks_delete("rtm.tasks.delete"),
     tasks_setstartdate("rtm.tasks.setStartDate"),
     tasks_setduedate("rtm.tasks.setDueDate"),
     timelines_create("rtm.timelines.create")

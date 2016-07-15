@@ -45,7 +45,7 @@ input[type=text].form-control {
   <h3>今日 {{today}} <input class="form-control" type="text" v-model="newTaskNameOfDay[1]" /><button class="btn btn-success" v-on:click="addTodaysNewTask(1)">add</button></h3>
   <ul>
     <li class="task" v-for="task in taskListOfDay(1)">
-      <div class="task-name" style="{{task.task_completed_date_optional ? 'text-decoration: line-through;' : ''}}">{{ task.task_name }} <span class="task-end-date">{{formatEndDate(task.task_end_date_optional)}}</span></div><div class="task-edit-buttons"><button class="btn btn-success" v-on:click="done(task)">DONE</button></div>
+      <div class="task-name" style="{{task.task_completed_date_optional ? 'text-decoration: line-through;' : ''}}">{{ task.task_name }} <span class="task-end-date">{{formatEndDate(task.task_end_date_optional)}}</span></div><div class="task-edit-buttons"><button class="btn btn-success" v-on:click="done(task)">DONE</button> <button class="btn btn-error" v-on:click="deleteTask(task)">DELETE</button></div>
     </li>
   </ul>
 
@@ -266,6 +266,22 @@ var Main = Vue.extend({
             // alert(JSON.stringify(data, null, '  '))
         })
       },
+      deleteTask: function(task) {
+        // delete
+        for(var i = 0; i < this.taskList.length; i++) {
+          if(this.taskList[i].task_id == task.task_id) {
+            model.taskList.splice(i, 1)
+            break;
+          }
+        }
+
+        taskRepository.deleteTask(
+          this, this.auth.token, task.task_id,
+          (data, status, request) => {},
+          function (data, status, request) {
+            this.pushOrUpdateTaskToModel(task)// 復活
+        })
+      },
       sortedTaskList: function() {
         var sortTask = (a, b) => {// 下ならプラスを返す
           if(a.task_end_date_optional && !b.task_end_date_optional) {
@@ -283,6 +299,9 @@ var Main = Vue.extend({
         };
 
         return this.taskList.filter((v) => {
+          if(v.task_deleted_date_optional) {
+            return false;
+          }
           if(!v.task_completed_date_optional) {
             return true;
           }
@@ -317,7 +336,9 @@ var Main = Vue.extend({
       taskRepository.getTaskList(this, this.auth.token,
         function (data, status, request) {
           console.log(data.detail);
-          model.taskList = data.detail.map(convertStringDateToDate);
+          model.taskList = data.detail
+            .filter(v => !v.task_deleted_date_optional)
+            .map(convertStringDateToDate);
         },
         function (data, status, request) {
           //GETメソッドが失敗した場合の処理

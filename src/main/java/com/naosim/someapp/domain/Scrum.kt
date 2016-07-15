@@ -10,6 +10,7 @@ interface タスク {
     val タスク名: タスク名
     val タスク消化予定日Optional: タスク消化予定日Optional
     val タスク完了日Optional: タスク完了日Optional
+    val タスク削除日Optional: タスク削除日Optional
 
     fun タスク状態(localDateTime: LocalDateTime): タスク状態 {
         if(this.タスク完了日Optional.isBefore(localDateTime)) {
@@ -47,6 +48,7 @@ interface タスクRepository {
     fun 追加(タスク名: タスク名, タスク消化予定日Optional: タスク消化予定日Optional): タスクEntity;
     fun すべてのタスク取得(): List<タスクEntity>
     fun 完了(タスクID: タスクID): タスクEntity
+    fun 削除(タスクID: タスクID): タスクEntity
 }
 
 
@@ -79,6 +81,17 @@ class タスク消化予定日(val localDate: LocalDate): タスク消化予定�
 }
 
 class タスク消化予定日NotExist : タスク消化予定日Optional {
+    override val isExist: Boolean = false
+}
+
+interface タスク削除日Optional : IsExist<タスク削除日Optional, タスク削除日>
+
+class タスク削除日(val localDate: LocalDate): タスク削除日Optional {
+    val format = localDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
+    override val isExist: Boolean = true
+}
+
+class タスク削除日NotExist : タスク削除日Optional {
     override val isExist: Boolean = false
 }
 

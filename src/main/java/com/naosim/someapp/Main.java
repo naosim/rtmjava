@@ -20,6 +20,7 @@ import com.naosim.someapp.infra.api.auth.gettoken.AuthGetTokenApi;
 import com.naosim.someapp.infra.api.task.add.TaskAddApi;
 import com.naosim.someapp.infra.api.lib.Api;
 import com.naosim.someapp.infra.api.task.complete.TaskCompleteApi;
+import com.naosim.someapp.infra.api.task.complete.TaskDeleteApi;
 import com.naosim.someapp.infra.api.task.list.TaskListApi;
 import com.naosim.someapp.infra.datasource.AuthRepository;
 import com.naosim.someapp.infra.datasource.タスクRepositoryWithRTM;
@@ -44,6 +45,7 @@ public class Main {
                 new TaskAddApi(repositoryFactory),
                 new TaskListApi(repositoryFactory),
                 new TaskCompleteApi(repositoryFactory),
+                new TaskDeleteApi(repositoryFactory),
                 
                 new AuthCheckTokenApi(repositoryFactory),
                 new AuthGetAuthUrlApi(repositoryFactory),

@@ -13,5 +13,6 @@ interface RtmTaskRepository {
     fun completeTask(token: Token, timelineId: TimelineId, taskIdSet: TaskIdSet): TransactionalResponse<TaskSeriesEntity>
     fun updateStartDateTime(token: Token, timelineId: TimelineId, taskIdSet: TaskIdSet, startDateTime: Optional<TaskStartDateTime>): TransactionalResponse<TaskSeriesEntity>
     fun updateDueDateTime(token: Token, timelineId: TimelineId, taskIdSet: TaskIdSet, dueDateTime: Optional<TaskDueDateTime>): TransactionalResponse<TaskSeriesEntity>
+    fun delete(token: Token, timelineId: TimelineId, taskIdSet: TaskIdSet): TransactionalResponse<TaskSeriesEntity>
 
 }

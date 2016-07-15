@@ -21,7 +21,8 @@ class タスクRepositoryWithRTM(val token: Token, val rtmRepository: RtmReposit
                 タスク更新RepositoryWithRTM(token, taskIdSet, this, rtmRepository),
                 タスク名,
                 タスク消化予定日Optional,
-                タスク完了日NotExist()
+                タスク完了日NotExist(),
+                タスク削除日NotExist()
         )
     }
 
@@ -33,13 +34,17 @@ class タスクRepositoryWithRTM(val token: Token, val rtmRepository: RtmReposit
         val タスク完了日Optional = taskSeriesEntity.taskEntity.taskDateTimes.taskCompletedDateTime
                 .map { タスク完了日(it.dateTime.toLocalDate()) as タスク完了日Optional }
                 .orElse(タスク完了日NotExist())
+        val タスク削除日Optional = taskSeriesEntity.taskEntity.taskDateTimes.taskDeletedDateTime
+                .map { タスク削除日(it.dateTime.toLocalDate()) as タスク削除日Optional }
+                .orElse(タスク削除日NotExist())
 
         return タスクEntityWithRTM(
                 タスクID,
                 タスク更新RepositoryWithRTM(token, taskSeriesEntity.taskIdSet, this, rtmRepository),
                 タスク名(taskSeriesEntity.taskSeriesName.rtmParamValue),
                 タスク消化予定日Optional,
-                タスク完了日Optional
+                タスク完了日Optional,
+                タスク削除日Optional
         )
     }
 
@@ -55,6 +60,12 @@ class タスクRepositoryWithRTM(val token: Token, val rtmRepository: RtmReposit
     override fun 完了(タスクID: タスクID): タスクEntity {
         val timelineId = rtmRepository.createTimeline(token)
         val result = rtmRepository.completeTask(token, timelineId, タスクIDConverter.createTaskIdSet(タスクID)).response
+        return convertTaskSeriesEntityToタスクEntity(result);
+    }
+
+    override fun 削除(タスクID: タスクID): タスクEntity {
+        val timelineId = rtmRepository.createTimeline(token)
+        val result = rtmRepository.delete(token, timelineId, タスクIDConverter.createTaskIdSet(タスクID)).response
         return convertTaskSeriesEntityToタスクEntity(result);
     }
 }

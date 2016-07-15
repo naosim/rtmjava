@@ -9,7 +9,8 @@ class MapConverter {
                 "task_id" to タスクEntity.タスクID.value,
                 "task_name" to タスクEntity.タスク名.value,
                 "task_end_date_optional" to タスクEntity.タスク消化予定日Optional.get().map { it.localDate.format(DateTimeFormatter.ISO_DATE) }.orElse(null),
-                "task_completed_date_optional" to タスクEntity.タスク完了日Optional.get().map { it.localDate.format(DateTimeFormatter.ISO_DATE) }.orElse(null)
+                "task_completed_date_optional" to タスクEntity.タスク完了日Optional.get().map { it.localDate.format(DateTimeFormatter.ISO_DATE) }.orElse(null),
+                "task_deleted_date_optional" to タスクEntity.タスク削除日Optional.get().map { it.localDate.format(DateTimeFormatter.ISO_DATE) }.orElse(null)
         )
     }
 
