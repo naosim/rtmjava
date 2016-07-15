@@ -70,7 +70,8 @@ public class Main {
 
         exception(RuntimeException.class, (exception, request, response) -> {
             // Handle the exception here
-            response.status(500);
+            exception.printStackTrace();
+            response.status(400);
             response.body(gson.toJson(new MapConverter().apiErrorResult(400, exception.getMessage())));
         });
     }
