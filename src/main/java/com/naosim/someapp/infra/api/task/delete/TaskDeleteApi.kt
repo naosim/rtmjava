@@ -13,7 +13,7 @@ import java.util.function.Function
 class TaskDeleteApi(val repositoryFactory: RepositoryFactory): Api<TaskDeleteRequest> {
     val mapConvertor = MapConverter()
     override val description = "タスク削除"
-    override val path = "/task/delte"
+    override val path = "/task/delete"
     override val requestParams = TaskDeleteRequest()
     override val ok: (TaskDeleteRequest) -> Any =  {
         val タスクEntity: タスクEntity = delete(it.token.get(), it.taskId.get())
